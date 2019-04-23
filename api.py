@@ -8,7 +8,7 @@ def test(req, resp):
 
 @api.route("/conferences/{conference_ID}")
 def conferences(req, resp, *, conference_ID):
-    resp.text = 'Lookin\' for some conferences?'
+    resp.text = "Lookin' for some conferences?"
 
 if __name__ == '__main__':
     api.run()
