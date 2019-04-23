@@ -6,5 +6,9 @@ api = responder.API()
 def test(req, resp):
     resp.text = 'Hello from Conftalks'
 
- __name__ == '__main__':
+@api.route("/conferences/{conference_ID}")
+def conferences(req, resp):
+    resp.text = 'Lookin\' for some conferences?'
+
+if __name__ == '__main__':
     api.run()
