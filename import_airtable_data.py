@@ -2,9 +2,10 @@ import requests
 import maya
 import bson
 from datetime import datetime
+from config import AIRTABLE_URL
 
 
-url = 'https://api.airtable.com/v0/appuFBQpMhzKDXSHn/Conferences?view=Grid%20view'
+url = AIRTABLE_URL
 
 headers = {'Authorization': 'Bearer keyOzyWXah5fdzUL1'}
 
