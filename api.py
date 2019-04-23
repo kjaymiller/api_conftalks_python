@@ -1,9 +1,10 @@
-import falcon
+import responder
 
-class conferenceResource:
-    def on_get(self, req, resp):
-        resp.media = {'text': 'Hello from Conftalks'}
+api = responder.API()
 
-api = falcon.API()
-api.add_route('/conferences', conferenceResource())
-        
+@api.route("/")
+def conferences(req, resp):
+    resp.text = 'Hello from Conftalks'
+
+if __name__ == '__main__':
+    api.run()

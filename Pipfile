@@ -13,6 +13,10 @@ verify_ssl = false
 [packages]
 falcon = "*"
 gunicorn = "*"
+pymongo = "*"
+requests = "*"
+maya = "*"
+responder = "*"
 
 [requires]
 python_version = "3.7"
