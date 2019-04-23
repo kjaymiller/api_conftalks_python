@@ -12,6 +12,7 @@ verify_ssl = false
 
 [packages]
 falcon = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"
