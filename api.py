@@ -5,5 +5,5 @@ class conferenceResource:
         resp.media = {'text': 'Hello from Conftalks'}
 
 api = falcon.API()
-api.add_route('/quote', conferenceResource())
+api.add_route('/conferences', conferenceResource())
         
