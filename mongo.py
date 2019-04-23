@@ -1,6 +1,9 @@
 from pymongo import MongoClient
-from config import MLAB_URL
+from config import (
+        MLAB_URL, 
+        MLAB_DB,
+        )
 
 client = MongoClient(MLAB_URL)
-collection = client['conferences']
-print(collection)
+db = client[MLAB_DB]
+conferences = db.conferences

@@ -3,8 +3,8 @@ import responder
 api = responder.API()
 
 @api.route("/")
-def conferences(req, resp):
+def test(req, resp):
     resp.text = 'Hello from Conftalks'
 
-if __name__ == '__main__':
+ __name__ == '__main__':
     api.run()
