@@ -2,12 +2,12 @@ import requests
 import maya
 import bson
 from datetime import datetime
-from config import AIRTABLE_URL
+from config import AIRTABLE_URL, AIRTABLE_KEY
 
 
 url = AIRTABLE_URL
 
-headers = {'Authorization': 'Bearer keyOzyWXah5fdzUL1'}
+headers = {'Authorization': f'Bearer {AIRTABLE_KEY}'}
 
 r = requests.get(url, headers=headers)
 if not(r.raise_for_status()):
