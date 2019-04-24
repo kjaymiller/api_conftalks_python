@@ -11,13 +11,11 @@ verify_ssl = false
 [dev-packages]
 
 [packages]
-falcon = "*"
 gunicorn = "*"
 pymongo = "*"
 requests = "*"
 maya = "*"
 responder = "*"
-python-bsonjs = "*"
 
 [requires]
 python_version = "3.7"

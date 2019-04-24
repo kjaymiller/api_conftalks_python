@@ -1,7 +1,4 @@
-from mongo import (
-        get_db_object_by_id,
-        get_all_items
-        )
+from mongo import get_db_items
 import json
 import responder
 
@@ -13,12 +10,11 @@ def test(req, resp):
 
 @api.route('/conferences')
 def all_conferences(req, resp):
-    resp.media = json.loads(get_all_items('conferences'))
+    resp.media = get_db_items('conferences')
 
-@api.route("/conferences/{conference_Id}")
-def conference_by_id(req, resp, *, conference_Id):
-    conference_data = get_db_object_by_id('conferences', conference_Id) 
-    resp.media = conference_data
+@api.route("/conferences/{conference_id}")
+def conference_by_id(req, resp, *, conference_id):
+    resp.media = get_db_items('conferences', _id=conference_id) 
 
 if __name__ == '__main__':
     api.run()
