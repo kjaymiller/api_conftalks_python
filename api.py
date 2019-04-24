@@ -1,10 +1,13 @@
 from mongo import (
         get_db_items,
-        load_db_data
+        load_db_data,
         )
-from key_gen import generate_api_key
-from mail import send_confirmation_email
+from mail import (
+        send_confirmation_email,
+        send_api_key_reset,
+        )
 
+from key_gen import generate_api_key
 import json
 import responder
 
@@ -53,6 +56,13 @@ async def add_user(req, resp):
 
     elif req.headers['Authorization']:
         resp.media = get_db_items('users', filter=({'api_key':req.headers['Authorization']}))
-    
+
+@api.route("/user/api_regen")
+async def regen_api_key(req, resp):
+    if req.method == 'get':
+        email_address = await req.media()['email']
+        
+
+
 if __name__ == '__main__':
     api.run()
