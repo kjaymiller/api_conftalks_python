@@ -9,6 +9,7 @@ url = "https://files.pythonhosted.org"
 verify_ssl = false 
 
 [dev-packages]
+pytest = "*"
 
 [packages]
 gunicorn = "*"
