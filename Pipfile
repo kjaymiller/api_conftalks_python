@@ -17,6 +17,7 @@ pymongo = "*"
 requests = "*"
 maya = "*"
 responder = "*"
+python-bsonjs = "*"
 
 [requires]
 python_version = "3.7"
