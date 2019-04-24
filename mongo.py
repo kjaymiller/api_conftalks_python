@@ -23,9 +23,9 @@ def get_db_items(collection, **kwargs):
         print(kwargs.get('_id'))
         return collection.find({'_id': ObjectId(kwargs.get('_id'))})
     
-    elif kwargs.get('filter'):
+    elif kwargs.get('filter_by'):
         print('filter detected')
-        return collection.find(kwargs.get('filter'))
+        return collection.find(kwargs.get('filter_by'))
 
     else: 
         print('returning all')
@@ -33,8 +33,14 @@ def get_db_items(collection, **kwargs):
 
 
 @jsonify_results
+def update_db_data(collection, filter_by, data):
+    collection = db[collection]
+    print('updating item')
+    collection.update_one(filter_by, data)
+    return collection.find_one(filter_by)
+
+
 def load_db_data(collection, json_obj):
     collection = db[collection]
     print('inserting item')
     return collection.insert_one(json_obj).inserted_id
-    

@@ -1,10 +1,11 @@
 from mongo import (
         get_db_items,
         load_db_data,
+        update_db_data,
         )
 from mail import (
         send_confirmation_email,
-        send_api_key_reset,
+        send_reset_key_email,
         )
 
 from key_gen import generate_api_key
@@ -43,7 +44,7 @@ async def add_user(req, resp):
         request_media = await req.media(format='json')
         email_address = request_media['email']
 
-        if not(get_db_items('users', filter={'email': email_address})): 
+        if not(get_db_items('users', filter_by={'email': email_address})): 
             api_key = generate_api_key()
             request_media['api_key'] = api_key
             insert_id = load_db_data('users', request_media)['$oid']
@@ -55,13 +56,34 @@ async def add_user(req, resp):
             resp.status_code = 400
 
     elif req.headers['Authorization']:
-        resp.media = get_db_items('users', filter=({'api_key':req.headers['Authorization']}))
+        resp.media = get_db_items('users', filter_by=({'api_key':req.headers['Authorization']}))
 
 @api.route("/user/api_regen")
 async def regen_api_key(req, resp):
     if req.method == 'get':
-        email_address = await req.media()['email']
+        email = req.params['email']
+        data = get_db_items('users', filter_by={'email': email})
+        reset_key = update_db_data(
+                'users', 
+                filter_by={'email': email},
+                data={'$set': {'api_reset_key': generate_api_key(35)}},
+                )['api_reset_key']
         
+        resp.text = 'An email with your Reset Key will be sent to you!'
+
+        @api.background.task
+        def key_reset():
+            send_reset_key_email(to=email, reset_key=reset_key)
+            
+        key_reset()
+
+
+    elif req.method == 'post' and 'api_reset_key' in request_media:
+       pass
+
+    else:
+        resp.status_code = 400
+        resp.text = 'No Key Provided'    
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import secrets
 
-def generate_api_key():
-    return secrets.token_urlsafe(20)
+def generate_api_key(len=20):
+    return secrets.token_urlsafe(len)
+

@@ -1,34 +1,78 @@
 from markdown import markdown
 
+import maya
 import requests
 import os
 import re
+from dataclasses import dataclass, field
 
-MAILGUN_BASE_URL = os.environ['MAILGUN_URL']
-API_KEY = os.environ['MAILGUN_API_KEY']
-
-# Authentication
-def send_confirmation_email(data):
-    TO = data['email']
-    FROM = os.environ['MAILGUN_ADMIN_EMAIL']
-    SUBJECT = 'Welcome to Conftalks'
-    with open('./confirmation_email.md') as md_file:
-        raw_markdown = md_file.read()
-        md_email = re.sub(r'{{API_KEY}}', data['api_key'], raw_markdown)
-        html_email = markdown(md_email)
-
-    with open('./confirmation_email.txt') as txt_email:
-        raw_text = txt_email.read()
-        text_email = re.sub(r'{{API_KEY}}', data['api_key'], raw_text)
-
-    data = {
-            'to': TO,
-            'from': FROM,
-            'subject': SUBJECT,
-            'text': text_email,
-            'html': html_email,
-            'tracking': True,
-            'o:tag': ['api_key', 'confirmation'],
+@dataclass
+class mailGunEmailData:
+    to: str
+    subject: str
+    text: str
+    html: str
+    url: str = os.environ['MAILGUN_URL']
+    tags: list = field(default_factory=list) 
+    API_KEY: str = os.environ['MAILGUN_API_KEY']
+    FROM: str = os.environ['MAILGUN_ADMIN_EMAIL']
+    tracking: bool = True
+    
+    def mail_gun_email_data(self):
+        return {
+            'to': self.to,
+            'from': self.FROM,
+            'subject': self.subject,
+            'text': self.text,
+            'html': self.html,
+            'tracking': self.tracking,
+            'o:tag': self.tags,
             }
 
-    print(requests.post(f'{MAILGUN_BASE_URL}/messages', auth=('api', API_KEY), data=data).text)
+    def sendMessage(self):
+        return requests.post(
+                self.url,
+                auth=('api', self.API_KEY), 
+                data=self.mail_gun_email_data())
+                
+
+
+# Authentication
+def send_confirmation_email(to, api_key):
+    subject = 'Welcome to Conftalks - Your Conftalks API Key'
+    with open('./email_templates/confirmation_email.md') as md_file:
+        raw_markdown = md_file.read()
+        md_email = re.sub(r'{{API_KEY}}', api_key, raw_markdown)
+        html = markdown(md_email)
+
+    with open('./email_templates/confirmation_email.txt') as txt_email:
+        raw_text = txt_email.read()
+        text = re.sub(r'{{API_KEY}}', api_key, raw_text)
+
+    print(mailGunEmailData( 
+            to=to,
+            subject=subject,
+            text=text,
+            html=html,
+            tags=['api_key', 'confirmation'],
+            ).sendMessage().url)
+
+
+def send_reset_key_email(to, reset_key):
+    subject = 'Reset your api key - Conftalks.dev' 
+    with open('./email_templates/reset_key_request_email.md') as md_file:
+        raw_markdown = md_file.read()
+        md_email = re.sub(r'{{EXPIRATION}}', maya.now().rfc2822(), raw_markdown)
+        html = markdown(md_email)
+
+    with open('./email_templates/reset_key_request_email.txt') as txt_email:
+        raw_text = txt_email.read()
+        text = re.sub(r'{{EXPIRATION}}', maya.now().rfc2822(), raw_text)
+
+    print(mailGunEmailData( 
+            to=to,
+            subject=subject,
+            text=text,
+            html=html,
+            tags=['api_key', 'reset', 'confirmation'],
+            ).sendMessage())
