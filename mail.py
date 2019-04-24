@@ -62,12 +62,16 @@ def send_reset_key_email(to, reset_key):
     subject = 'Reset your api key - Conftalks.dev' 
     with open('./email_templates/reset_key_request_email.md') as md_file:
         raw_markdown = md_file.read()
-        md_email = re.sub(r'{{EXPIRATION}}', maya.now().add(minutes=5).rfc2822(), raw_markdown)
+        md_email = re.sub(r'{{EXPIRATION}}', reset_key['expiration'], raw_markdown)
+        md_email = re.sub(r'{{RESET_LINK}}', os.environ['RESET_LINK'], md_email)
+        md_email = re.sub(r'{{AUTHORIZATION_KEY}}', reset_key['key'], md_email)
         html = markdown(md_email)
 
     with open('./email_templates/reset_key_request_email.txt') as txt_email:
         raw_text = txt_email.read()
-        text = re.sub(r'{{EXPIRATION}}', maya.now().add(minutes=5).rfc2822(), raw_text)
+        text = re.sub(r'{{EXPIRATION}}', reset_key['expiration'], raw_text)
+        text = re.sub(r'{{RESET_LINK}}', os.environ['RESET_LINK'], text)
+        text = re.sub(r'{{AUTHORIZATION_KEY}}', reset_key['key'], text)
 
     print(mailGunEmailData( 
             to=to,

@@ -11,6 +11,7 @@ from mail import (
 from key_gen import generate_api_key
 import json
 import responder
+import maya
 
 api = responder.API()
 
@@ -66,8 +67,9 @@ async def regen_api_key(req, resp):
         reset_key = update_db_data(
                 'users', 
                 filter_by={'email': email},
-                data={'$set': {'api_reset_key': generate_api_key(35)}},
-                )['api_reset_key']
+                data={'$set': {'api_reset': {'key': generate_api_key(35),
+                    'expiriation': maya.now().add(minutes=5).rfc2822()}}},
+                )['api_reset']
         
         resp.text = 'An email with your Reset Key will be sent to you!'
 
