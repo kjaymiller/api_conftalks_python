@@ -7,6 +7,7 @@ import os
 client = MongoClient(os.environ['MONGODB_URI'])
 db = client.get_database()
 
+
 def jsonify_results(funct):
     def inner(*args, **kwargs):
         f = funct(*args, **kwargs)

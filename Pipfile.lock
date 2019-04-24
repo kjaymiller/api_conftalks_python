@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a2f6f302d7da9722393af3652ecd84e93036091fa90c64d89690bc79c5a0e830"
+            "sha256": "c56fdcefe2a577841ee30049756fc4209cf9c40c305db2b701357cf850966c8b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -170,6 +170,14 @@
                 "sha256:14dd6caf1527abb21f08f86c784eac40853ba93edb79552aa1e4b8aef1b61c7b"
             ],
             "version": "==2.10.1"
+        },
+        "markdown": {
+            "hashes": [
+                "sha256:fc4a6f69a656b8d858d7503bda633f4dd63c2d70cf80abdc6eafa64c4ae8c250",
+                "sha256:fe463ff51e679377e3624984c829022e2cfb3be5518726b06f608a07a3aad680"
+            ],
+            "index": "pypi",
+            "version": "==3.1"
         },
         "markupsafe": {
             "hashes": [
@@ -429,7 +437,7 @@
                 "sha256:c48692bf4587ce281d641087658eca275a5ad3b63c78297bbded96570ae9ce8f",
                 "sha256:fefc3b2b947c99737c348887db2c32e539160dcbeb7af9aa6b53db7a283538fe"
             ],
-            "markers": "sys_platform != 'win32'",
+            "markers": "sys_platform != 'win32' and sys_platform != 'cygwin' and platform_python_implementation != 'pypy'",
             "version": "==0.12.2"
         },
         "websockets": {

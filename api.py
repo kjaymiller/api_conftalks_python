@@ -2,6 +2,8 @@ from mongo import (
         get_db_items,
         load_db_data
         )
+from key_gen import generate_api_key
+from mail import send_confirmation_email
 
 import json
 import responder
@@ -24,7 +26,33 @@ async def all_conferences(req, resp):
 
 @api.route("/conferences/{conference_id}")
 def conference_by_id(req, resp, *, conference_id):
-        resp.media = get_db_items('conferences', _id=conference_id) 
+    resp.media = get_db_items('conferences', _id=conference_id) 
 
+
+@api.route("/user")
+async def add_user(req, resp):
+
+    @api.background.task
+    def confirmation_email(data):
+        send_confirmation_email(data) 
+    
+    if req.method == 'post':
+        request_media = await req.media(format='json')
+        email_address = request_media['email']
+
+        if not(get_db_items('users', filter={'email': email_address})): 
+            api_key = generate_api_key()
+            request_media['api_key'] = api_key
+            insert_id = load_db_data('users', request_media)['$oid']
+            resp.media = get_db_items('users', _id=insert_id)
+            confirmation_email(resp.media[0])    
+        
+        else:
+            resp.text = f'Email Account {email_address} already exists'
+            resp.status_code = 400
+
+    elif req.headers['Authorization']:
+        resp.media = get_db_items('users', filter=({'api_key':req.headers['Authorization']}))
+    
 if __name__ == '__main__':
     api.run()
