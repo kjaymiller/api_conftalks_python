@@ -34,5 +34,6 @@ def get_db_items(collection, **kwargs):
 @jsonify_results
 def load_db_data(collection, json_obj):
     collection = db[collection]
-    insert = collection.insert_one(json_obj)
+    print('inserting item')
+    return collection.insert_one(json_obj).inserted_id
     
