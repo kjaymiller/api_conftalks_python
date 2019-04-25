@@ -61,7 +61,11 @@ async def add_user(req, resp):
 
 @api.route("/user/api_regen")
 async def regen_api_key(req, resp):
-    if req.method == 'get':
+    if 'authorization_key' in req.params:
+        data = get_db_items('users', filter_by={api_reset.key})
+        resp.media = data
+
+    elif 'email' in req.params:
         email = req.params['email']
         data = get_db_items('users', filter_by={'email': email})
         reset_key = update_db_data(
@@ -70,22 +74,18 @@ async def regen_api_key(req, resp):
                 data={'$set': {'api_reset': {'key': generate_api_key(35),
                     'expiriation': maya.now().add(minutes=5).rfc2822()}}},
                 )['api_reset']
-        
+        print(reset_key) 
         resp.text = 'An email with your Reset Key will be sent to you!'
+
+    else: 
+        resp.status_code = 400
+        resp.text = 'You must supply an email or an authorization_key'
 
         @api.background.task
         def key_reset():
             send_reset_key_email(to=email, reset_key=reset_key)
             
         key_reset()
-
-
-    elif req.method == 'post' and 'api_reset_key' in request_media:
-       pass
-
-    else:
-        resp.status_code = 400
-        resp.text = 'No Key Provided'    
 
 
 if __name__ == '__main__':
