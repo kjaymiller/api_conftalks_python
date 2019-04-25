@@ -57,12 +57,12 @@ async def add_user(req, resp):
             resp.status_code = 400
 
     elif req.headers['Authorization']:
-        resp.media = get_db_items('users', filter_by=({'api_key':req.headers['Authorization']}))
+        resp.media = get_db_items('users', filter_by={'api_key':req.headers['Authorization']})
 
 @api.route("/user/api_regen")
 async def regen_api_key(req, resp):
     if 'authorization_key' in req.params:
-        data = get_db_items('users', filter_by={api_reset.key})
+        data = get_db_items('users', filter_by={'api_reset.key': req.params['authorization_key']})
         resp.media = data
 
     elif 'email' in req.params:
@@ -72,20 +72,19 @@ async def regen_api_key(req, resp):
                 'users', 
                 filter_by={'email': email},
                 data={'$set': {'api_reset': {'key': generate_api_key(35),
-                    'expiriation': maya.now().add(minutes=5).rfc2822()}}},
+                    'expiration': maya.now().add(minutes=5).rfc2822()}}},
                 )['api_reset']
-        print(reset_key) 
+        @api.background.task
+        def key_reset():
+            send_reset_key_email(to=email, reset_key=reset_key)
+            
+        await key_reset()
         resp.text = 'An email with your Reset Key will be sent to you!'
 
     else: 
         resp.status_code = 400
         resp.text = 'You must supply an email or an authorization_key'
 
-        @api.background.task
-        def key_reset():
-            send_reset_key_email(to=email, reset_key=reset_key)
-            
-        key_reset()
 
 
 if __name__ == '__main__':
