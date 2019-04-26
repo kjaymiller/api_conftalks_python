@@ -74,6 +74,7 @@ async def regen_api_key(req, resp):
                 data={'$set': {'api_reset': {'key': generate_api_key(35),
                     'expiration': maya.now().add(minutes=5).rfc2822()}}},
                 )['api_reset']
+
         @api.background.task
         def key_reset():
             send_reset_key_email(to=email, reset_key=reset_key)
