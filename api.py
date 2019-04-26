@@ -3,7 +3,6 @@ from mongo import (
         load_db_data,
         update_db_data,
         )
-
 from mail import (
         send_confirmation_email,
         send_reset_key_email,
@@ -47,7 +46,8 @@ async def add_user(req, resp):
         email_address = request_media['email']
 
         if not(get_db_items('users', filter_by={'email': email_address})): 
-            request_media['api_key'] = generate_api_key()
+            api_key = generate_api_key()
+            request_media['api_key'] = api_key
             insert_id = load_db_data('users', request_media)['$oid']
             resp.media = get_db_items('users', _id=insert_id)
             confirmation_email(resp.media[0])    
@@ -62,17 +62,7 @@ async def add_user(req, resp):
 @api.route("/user/api_regen")
 async def regen_api_key(req, resp):
     if 'authorization_key' in req.params:
-        reset_data = get_db_items('users', filter_by={'api_reset.key': req.params['authorization_key']})
-        expiration = maya.when(reset_data['api_reset']['expiration'])
-        
-        if expiration > maya.now():
-            api_key = generate_api_key() 
-            update_db_items('users', data, {
-                '$set': {'api_key': api_key},
-                '$unset': {'api_reset': ''}
-                })
-
-        data = get_db_items('users', filter_by={'api_key': api_key})
+        data = get_db_items('users', filter_by={'api_reset.key': req.params['authorization_key']})
         resp.media = data
 
     elif 'email' in req.params:
@@ -85,10 +75,10 @@ async def regen_api_key(req, resp):
                     'expiration': maya.now().add(minutes=5).rfc2822()}}},
                 )['api_reset']
         @api.background.task
-        def key_reset_email():
+        def key_reset():
             send_reset_key_email(to=email, reset_key=reset_key)
             
-        await key_reset_email()
+        await key_reset()
         resp.text = 'An email with your Reset Key will be sent to you!'
 
     else: 
