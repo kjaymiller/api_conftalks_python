@@ -3,6 +3,7 @@ from mongo import (
         load_db_data,
         update_db_data,
         )
+
 from mail import (
         send_confirmation_email,
         send_reset_key_email,
@@ -46,8 +47,7 @@ async def add_user(req, resp):
         email_address = request_media['email']
 
         if not(get_db_items('users', filter_by={'email': email_address})): 
-            api_key = generate_api_key()
-            request_media['api_key'] = api_key
+            request_media['api_key'] = generate_api_key()
             insert_id = load_db_data('users', request_media)['$oid']
             resp.media = get_db_items('users', _id=insert_id)
             confirmation_email(resp.media[0])    
@@ -57,12 +57,22 @@ async def add_user(req, resp):
             resp.status_code = 400
 
     elif req.headers['Authorization']:
-        resp.media = get_db_items('users', filter_by=({'api_key':req.headers['Authorization']}))
+        resp.media = get_db_items('users', filter_by={'api_key':req.headers['Authorization']})
 
 @api.route("/user/api_regen")
 async def regen_api_key(req, resp):
     if 'authorization_key' in req.params:
-        data = get_db_items('users', filter_by={api_reset.key})
+        reset_data = get_db_items('users', filter_by={'api_reset.key': req.params['authorization_key']})
+        expiration = maya.when(reset_data['api_reset']['expiration'])
+        
+        if expiration > maya.now():
+            api_key = generate_api_key() 
+            update_db_items('users', data, {
+                '$set': {'api_key': api_key},
+                '$unset': {'api_reset': ''}
+                })
+
+        data = get_db_items('users', filter_by={'api_key': api_key})
         resp.media = data
 
     elif 'email' in req.params:
@@ -72,20 +82,19 @@ async def regen_api_key(req, resp):
                 'users', 
                 filter_by={'email': email},
                 data={'$set': {'api_reset': {'key': generate_api_key(35),
-                    'expiriation': maya.now().add(minutes=5).rfc2822()}}},
+                    'expiration': maya.now().add(minutes=5).rfc2822()}}},
                 )['api_reset']
-        print(reset_key) 
+        @api.background.task
+        def key_reset_email():
+            send_reset_key_email(to=email, reset_key=reset_key)
+            
+        await key_reset_email()
         resp.text = 'An email with your Reset Key will be sent to you!'
 
     else: 
         resp.status_code = 400
         resp.text = 'You must supply an email or an authorization_key'
 
-        @api.background.task
-        def key_reset():
-            send_reset_key_email(to=email, reset_key=reset_key)
-            
-        key_reset()
 
 
 if __name__ == '__main__':
