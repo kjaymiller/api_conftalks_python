@@ -1,6 +1,5 @@
 from markdown import markdown
 
-import maya
 import requests
 import os
 import re

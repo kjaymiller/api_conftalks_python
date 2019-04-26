@@ -29,6 +29,23 @@ async def all_conferences(req, resp):
     else:
         resp.media = get_db_items('conferences')
 
+
+
+@api.route('conferences/{conference_id}/dates')
+async def conference_dates(req, resp, *, conference_id):
+    conference_data = get_db_items('conferences', _id=conference_id)
+    if req.method == 'get':
+        pass
+
+    if req.method == 'post':
+        request_media = await req.media(format='json')
+        dates = request_media['dates']
+        resp.media = update_db_data('conferences',
+                filter_by = conference_data,
+                data = {'$push': {'$each': dates}},
+                upsert = True)
+
+
 @api.route("/conferences/{conference_id}")
 def conference_by_id(req, resp, *, conference_id):
     resp.media = get_db_items('conferences', _id=conference_id) 
@@ -85,7 +102,6 @@ async def regen_api_key(req, resp):
     else: 
         resp.status_code = 400
         resp.text = 'You must supply an email or an authorization_key'
-
 
 
 if __name__ == '__main__':
