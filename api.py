@@ -1,4 +1,5 @@
 from mongo import (
+        db,
         get_db_items,
         load_db_data,
         update_db_data,
@@ -31,19 +32,15 @@ async def all_conferences(req, resp):
 
 
 
-@api.route('conferences/{conference_id}/dates')
-async def conference_dates(req, resp, *, conference_id):
-    conference_data = get_db_items('conferences', _id=conference_id)
+@api.route('/events')
+async def event_dates(req, resp): 
     if req.method == 'get':
         pass
 
     if req.method == 'post':
         request_media = await req.media(format='json')
-        dates = request_media['dates']
-        resp.media = update_db_data('conferences',
-                filter_by = conference_data,
-                data = {'$push': {'$each': dates}},
-                upsert = True)
+        response_id = load_db_data('events', request_media)
+        resp.media = get_db_items('events', _id=response_id)
 
 
 @api.route("/conferences/{conference_id}")
@@ -57,7 +54,7 @@ async def add_user(req, resp):
     @api.background.task
     def confirmation_email(data):
         send_confirmation_email(data) 
-    
+
     if req.method == 'post':
         request_media = await req.media(format='json')
         email_address = request_media['email']
@@ -76,7 +73,22 @@ async def add_user(req, resp):
     elif req.headers['Authorization']:
         resp.media = get_db_items('users', filter_by={'api_key':req.headers['Authorization']})
 
-@api.route("/user/api_regen")
+@api.route('/event/{event_id}/subscribe')
+async def user_subscribe_to_event(req, resp, *, event_id):
+    if req.method != 'post':
+        resp.status_code = 401
+        method = req.method.upper()
+        resp.content = f'invalid request type {method}'
+        
+    user_info = get_db_items('users', filter_by= {'api_key': req.headers['Authorization']})
+    request_media = await req.media(format='json') 
+    print(event_id)
+"""
+update_db_data('events',
+            _id=event_id,
+            data={'$push': {'subscribers': user_info['email']}})
+"""
+api.route("/user/api_regen")
 async def regen_api_key(req, resp):
     if 'authorization_key' in req.params:
         data = get_db_items('users', filter_by={'api_reset.key': req.params['authorization_key']})

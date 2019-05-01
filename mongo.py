@@ -33,11 +33,14 @@ def get_db_items(collection, **kwargs):
 
 
 @jsonify_results
-def update_db_data(collection, filter_by, data):
-    collection = db[collection]
+def update_db_data(collection, data, **kwargs):
     print('updating item')
-    collection.update_one(filter_by, data)
-    return collection.find_one(filter_by)
+    collection = db[collection]
+    if _id:
+        return collection.update({'_id': ObjectId(kwargs.get('_id'))}, data)
+
+    else:
+        return collection.update(kwargs.get('filter_by'), data)
 
 
 def load_db_data(collection, json_obj):
