@@ -36,7 +36,7 @@ def get_db_items(collection, **kwargs):
 def update_db_data(collection, filter_by, data):
     collection = db[collection]
     print('updating item')
-    collection.update_one(filter_by, data)
+    collection.find_one(filter_by).update(data, upsert=True)
     return collection.find_one(filter_by)
 
 

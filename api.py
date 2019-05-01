@@ -29,26 +29,31 @@ async def all_conferences(req, resp):
     else:
         resp.media = get_db_items('conferences')
 
-
-
-@api.route('conferences/{conference_id}/dates')
-async def conference_dates(req, resp, *, conference_id):
-    conference_data = get_db_items('conferences', _id=conference_id)
-    if req.method == 'get':
-        pass
-
-    if req.method == 'post':
-        request_media = await req.media(format='json')
-        dates = request_media['dates']
-        resp.media = update_db_data('conferences',
-                filter_by = conference_data,
-                data = {'$push': {'$each': dates}},
-                upsert = True)
-
-
 @api.route("/conferences/{conference_id}")
 def conference_by_id(req, resp, *, conference_id):
+    print('getting conference information')
     resp.media = get_db_items('conferences', _id=conference_id) 
+
+
+
+@api.route('/events')
+class Events:
+    def on_get(self, req, resp):
+        """Return Latest Events Limited by Limit Request.
+        TODO: Restrict calls not using a filter.
+        """
+        resp.media = get_db_items('conferences')
+
+    def on_post(self, req, resp):
+        """Add an event to the events collection.
+        TODO: Bulk Add Events.
+        """
+        request_media = await req.media(format='json')
+        dates = request_media['events']
+        resp.media = update_db_data('conferences',
+                filter_by = conference_data[0],
+                data = {'$push': {'dates': dates}},
+                )
 
 
 @api.route("/user")
