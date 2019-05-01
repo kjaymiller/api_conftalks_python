@@ -15,24 +15,30 @@ import maya
 
 api = responder.API()
 
+
 @api.route("/")
 def test(req, resp):
     resp.text = 'Hello from Conftalks'
 
+
 @api.route('/conferences')
-async def all_conferences(req, resp):
-    if req.method in ('post', 'put'):
+class AllConferences:
+    def on_get(self, req, resp):
+        resp.media = get_db_items('conferences')
+
+@api.route('/conferences/{conference_id}')
+class ConferenceById:
+    async def on_post(self, req, resp, *, conference_id):
         request_media = await req.media(format='json')
         insert_id = load_db_data('conferences', request_media)['$oid']
         resp.media = get_db_items('conferences', _id=insert_id)
 
-    else:
-        resp.media = get_db_items('conferences')
+    async def on_put(self, req, resp, *, conference_id):
+        request_media = await req.media(format='json')
+        resp.media = get_db_items('conferences', _id=insert_id)
 
-@api.route("/conferences/{conference_id}")
-def conference_by_id(req, resp, *, conference_id):
-    print('getting conference information')
-    resp.media = get_db_items('conferences', _id=conference_id) 
+    def on_get(self, req, resp):
+        resp.media = get_db_items('conferences', _id=conference_id) 
 
 
 
@@ -44,7 +50,7 @@ class Events:
         """
         resp.media = get_db_items('conferences')
 
-    def on_post(self, req, resp):
+    async def on_post(self, req, resp):
         """Add an event to the events collection.
         TODO: Bulk Add Events.
         """
