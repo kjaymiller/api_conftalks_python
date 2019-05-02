@@ -1,5 +1,4 @@
 from mongo import (
-        db,
         get_db_items,
         load_db_data,
         update_db_data,
@@ -16,52 +15,39 @@ import maya
 
 api = responder.API()
 
-
 @api.route("/")
 def test(req, resp):
     resp.text = 'Hello from Conftalks'
 
-
 @api.route('/conferences')
-class AllConferences:
-    def on_get(self, req, resp):
-        resp.media = get_db_items('conferences')
-
-@api.route('/conferences/{conference_id}')
-class ConferenceById:
-    async def on_post(self, req, resp, *, conference_id):
+async def all_conferences(req, resp):
+    if req.method in ('post', 'put'):
         request_media = await req.media(format='json')
         insert_id = load_db_data('conferences', request_media)['$oid']
         resp.media = get_db_items('conferences', _id=insert_id)
 
-    async def on_put(self, req, resp, *, conference_id):
-        request_media = await req.media(format='json')
-        resp.media = get_db_items('conferences', _id=insert_id)
-
-    def on_get(self, req, resp):
-        resp.media = get_db_items('conferences', _id=conference_id) 
-
-
-@api.route('/events')
-class Events:
-    def on_get(self, req, resp):
-        """Return Latest Events Limited by Limit Request.
-        TODO: Restrict calls not using a filter.
-        """
+    else:
         resp.media = get_db_items('conferences')
-
-    async def on_post(self, req, resp):
-        """Add an event to the events collection.
-        TODO: Bulk Add Events.
-        """
-        request_media = await req.media(format='json')
-        response_id = load_db_data('events', request_media)
-        resp.media = get_db_items('events', _id=response_id)
 
 
 @api.route("/conferences/{conference_id}")
 def conference_by_id(req, resp, *, conference_id):
     resp.media = get_db_items('conferences', _id=conference_id) 
+
+
+@api.route('conferences/{conference_id}/dates')
+def conference_dates(req, resp, *, conference_id):
+    conference_data = load_db_items('conferences', _id=conference_id)
+
+    if req.method == 'get':
+        if 'dates' in conference_data:
+
+    if req.method == 'post':
+        resp.media = update_db_data('conferences',
+                _id = conference_id, 
+                data
+                )
+    
 
 
 @api.route("/user")
@@ -70,7 +56,7 @@ async def add_user(req, resp):
     @api.background.task
     def confirmation_email(data):
         send_confirmation_email(data) 
-
+    
     if req.method == 'post':
         request_media = await req.media(format='json')
         email_address = request_media['email']
@@ -89,22 +75,7 @@ async def add_user(req, resp):
     elif req.headers['Authorization']:
         resp.media = get_db_items('users', filter_by={'api_key':req.headers['Authorization']})
 
-@api.route('/event/{event_id}/subscribe')
-async def user_subscribe_to_event(req, resp, *, event_id):
-    if req.method != 'post':
-        resp.status_code = 401
-        method = req.method.upper()
-        resp.content = f'invalid request type {method}'
-        
-    user_info = get_db_items('users', filter_by= {'api_key': req.headers['Authorization']})
-    request_media = await req.media(format='json') 
-    print(event_id)
-"""
-update_db_data('events',
-            _id=event_id,
-            data={'$push': {'subscribers': user_info['email']}})
-"""
-api.route("/user/api_regen")
+@api.route("/user/api_regen")
 async def regen_api_key(req, resp):
     if 'authorization_key' in req.params:
         data = get_db_items('users', filter_by={'api_reset.key': req.params['authorization_key']})

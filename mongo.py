@@ -36,12 +36,11 @@ def get_db_items(collection, **kwargs):
 def update_db_data(collection, data, **kwargs):
     print('updating item')
     collection = db[collection]
-    if _id:
+    if kwargs.get('_id')
         return collection.update({'_id': ObjectId(kwargs.get('_id'))}, data)
 
     else:
         return collection.update(kwargs.get('filter_by'), data)
-
 
 def load_db_data(collection, json_obj):
     collection = db[collection]
