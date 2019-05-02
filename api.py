@@ -5,6 +5,8 @@ from mongo import (
         update_db_data,
         )
 
+from marshmallow import Schema, fields
+
 from mail import (
         send_confirmation_email,
         send_reset_key_email,
@@ -20,43 +22,122 @@ contact = {
         'url': 'https://productivityintech.com',
         'email': 'info@productivityintech.com',
         }
+api_description = '''This is the Conftalks.dev Public API. It is used to manage
+your alerts!
+'''
+        
 
 api = responder.API(
         title='Conftalks API',
         version='0.1',
-        openapi='3.0.1',
-        docs_route='/docs',
+        openapi='3.0.2',
+        docs_route='/',
         contact=contact,
+        description=api_description,
         )
 
+@api.schema('Conference')
+class ConferenceSchema(Schema):
+    id = fields.String()
+    url = fields.String()
+    name = fields.String()
 
-@api.route("/")
-def test(req, resp):
-    resp.text = 'Hello from Conftalks'
 
+@api.route("/conferences")
+def conferences(req, resp):
+    """
+    TODO: Add Filters
+    ---
+    get:
+        description: Returns a list of the Conferences in the system
+        responses:
+            200:
+                description: Success
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Conference'
+    """
+    conference_data = get_db_items('conferences')
+    conferences = ConferenceSchema(many=True)
+    resp.media = conferences.dump(conference_data)
 
-@api.route('/conferences')
-class AllConferences:
-    def on_get(self, req, resp):
-        resp.media = get_db_items('conferences')
 
 @api.route('/conferences/{conference_id}')
 class ConferenceById:
+    """
+    ---
+    get: 
+        description: Return the information on a single conference.
+        responses:
+            200:
+                description: Success
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Conference'
+
+    post:
+        description: Add a new conference.
+        responses:
+            200:
+                description: Success
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Conference'
+
+    put:
+        description: Update an existing conference.
+        responses:
+            200:
+                description: Success
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Conference'
+    """
     async def on_post(self, req, resp, *, conference_id):
+        """Creates New Conference Item"""
         request_media = await req.media(format='json')
         insert_id = load_db_data('conferences', request_media)['$oid']
         resp.media = get_db_items('conferences', _id=insert_id)
 
     async def on_put(self, req, resp, *, conference_id):
+        """Updates an Existing Conference Item"""
         request_media = await req.media(format='json')
         resp.media = get_db_items('conferences', _id=insert_id)
 
     def on_get(self, req, resp, *, conference_id):
+        """Returns a single conference item""" 
         resp.media = get_db_items('conferences', _id=conference_id) 
 
 
 @api.route('/events')
 class Events:
+    """
+    ---
+    get:
+        description: Returns a Single Event Object
+        responses:
+            200:
+                description: Success 
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Event'
+
+    post:
+        description: Creates a Single Event
+        responses:
+            200:
+                description: Success 
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Event'
+    """
+
     def on_get(self, req, resp):
         """Return Latest Events Limited by Limit Request.
         TODO: Restrict calls not using a filter.
@@ -68,6 +149,13 @@ class Events:
         TODO: Bulk Add Events.
         """
         request_media = await req.media(format='json')
+        
+        #convert start and end dates to datetime
+        event_start = request_media['events']['event_start']
+        event_end = request_media['events']['event_end']
+        request_media['events']['event_start'] = maya.when(event_start).datetime()
+        request_media['events']['event_end'] = maya.when(event_end).datetime()
+
         response_id = load_db_data('events', request_media)
         resp.media = get_db_items('events', _id=response_id)
 

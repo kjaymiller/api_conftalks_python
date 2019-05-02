@@ -1,0 +1,104 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+AIRTABLE_KEY	config.py	/^AIRTABLE_KEY = 'keyAmjnr0s9VtQeFG'$/;"	v
+AIRTABLE_KEY	import_airtable_data.py	/^from config import MLAB_DB, AIRTABLE_URL, AIRTABLE_KEY$/;"	i
+AIRTABLE_URL	import_airtable_data.py	/^from config import MLAB_DB, AIRTABLE_URL, AIRTABLE_KEY$/;"	i
+AddUser	api.py	/^async def AddUser(req, resp):$/;"	f
+AllConferences	api.py	/^class AllConferences:$/;"	c
+ConferenceById	api.py	/^class ConferenceById:$/;"	c
+Events	api.py	/^class Events:$/;"	c
+MLAB_DB	config.py	/^MLAB_DB = 'heroku_8739whzz'$/;"	v
+MLAB_DB	import_airtable_data.py	/^from config import MLAB_DB, AIRTABLE_URL, AIRTABLE_KEY$/;"	i
+MLAB_PORT	config.py	/^MLAB_PORT = 45926$/;"	v
+MLAB_PWD	config.py	/^MLAB_PWD = quote_plus('dysdu6-fitZek-varvan')$/;"	v
+MLAB_URL	config.py	/^MLAB_URL = f'mongodb:\/\/{MLAB_USERNAME}:{MLAB_PWD}@ds145926.mlab.com:{MLAB_PORT}\/{MLAB_DB}'$/;"	v
+MLAB_USERNAME	config.py	/^MLAB_USERNAME = quote_plus('kjaymiller')$/;"	v
+MongoClient	mongo.py	/^from pymongo import MongoClient$/;"	i
+ObjectId	mongo.py	/^from bson.objectid import ObjectId$/;"	i
+RELAXED_JSON_OPTIONS	mongo.py	/^from bson.json_util import dumps, RELAXED_JSON_OPTIONS$/;"	i
+UserSubcribeToEvent	api.py	/^class UserSubcribeToEvent:$/;"	c
+api	api.py	/^api = responder.API()$/;"	v
+api	tests/test_base_url.py	/^def api():$/;"	f
+api	tests/test_conferences.py	/^def api():$/;"	f
+api	tests/test_events.py	/^def api():$/;"	f
+client	mongo.py	/^client = MongoClient(os.environ['MONGODB_URI'])$/;"	v
+collection	send_notifications.py	/^collection = db['events']$/;"	v
+conferences	import_airtable_data.py	/^    conferences = r.json()['records']$/;"	v
+conferences_collection	import_airtable_data.py	/^from mongo import conferences as conferences_collection$/;"	i
+confirmation_email	api.py	/^    def confirmation_email(self, data):$/;"	f	function:AddUser
+dataclass	mail.py	/^from dataclasses import dataclass, field$/;"	i
+datetime	import_airtable_data.py	/^from datetime import datetime$/;"	i
+db	mongo.py	/^db = client.get_database()$/;"	v
+db	send_notifications.py	/^from mongo import db$/;"	i
+dumps	mongo.py	/^from bson.json_util import dumps, RELAXED_JSON_OPTIONS$/;"	i
+event	tests/tests.py	/^event = {'event_name': 'cfp',$/;"	v
+field	mail.py	/^from dataclasses import dataclass, field$/;"	i
+generate_api_key	api.py	/^from key_gen import generate_api_key$/;"	i
+generate_api_key	key_gen.py	/^def generate_api_key(len=20):$/;"	f
+get_db_items	mongo.py	/^def get_db_items(collection, **kwargs):$/;"	f
+get_event_by_id	api.py	/^def get_event_by_id(req, resp, *, event_id):$/;"	f
+get_maya_time	import_airtable_data.py	/^def get_maya_time(time):$/;"	f
+get_upcoming_emails	send_notifications.py	/^def get_upcoming_emails():$/;"	f
+headers	import_airtable_data.py	/^headers = {'Authorization': f'Bearer {AIRTABLE_KEY}'}$/;"	v
+inner	mongo.py	/^    def inner(*args, **kwargs):$/;"	f	function:jsonify_results
+json	api.py	/^import json$/;"	i
+json	mongo.py	/^import json$/;"	i
+json	tests/test_conferences.py	/^import json$/;"	i
+json	tests/tests.py	/^import json$/;"	i
+jsonify_results	mongo.py	/^def jsonify_results(funct):$/;"	f
+key_reset	api.py	/^        def key_reset():$/;"	f	function:regen_api_key
+load_db_data	mongo.py	/^def load_db_data(collection, json_obj):$/;"	f
+mailGunEmailData	mail.py	/^class mailGunEmailData:$/;"	c
+mail_gun_email_data	mail.py	/^    def mail_gun_email_data(self):$/;"	m	class:mailGunEmailData
+main	import_airtable_data.py	/^def main():$/;"	f
+markdown	mail.py	/^from markdown import markdown$/;"	i
+maya	api.py	/^import maya$/;"	i
+maya	import_airtable_data.py	/^import maya$/;"	i
+maya	send_notifications.py	/^import maya$/;"	i
+maya	tests/tests.py	/^import maya$/;"	i
+on_get	api.py	/^    def on_get(self, req, resp):$/;"	f	function:AddUser
+on_get	api.py	/^    def on_get(self, req, resp):$/;"	m	class:AllConferences
+on_get	api.py	/^    def on_get(self, req, resp):$/;"	m	class:Events
+on_get	api.py	/^    def on_get(self, req, resp, *, conference_id):$/;"	m	class:ConferenceById
+on_post	api.py	/^    async def on_post(self, req, resp):$/;"	f	function:AddUser
+on_post	api.py	/^    async def on_post(self, req, resp):$/;"	m	class:Events
+on_post	api.py	/^    async def on_post(self, req, resp, *, conference_id):$/;"	m	class:ConferenceById
+on_post	api.py	/^    async def on_post(self, req, resp, *, event_id):$/;"	m	class:UserSubcribeToEvent
+on_put	api.py	/^    async def on_put(self, req, resp, *, conference_id):$/;"	m	class:ConferenceById
+os	key_gen.py	/^import os$/;"	i
+os	mail.py	/^import os$/;"	i
+os	mongo.py	/^import os$/;"	i
+os	tests/test_events.py	/^import os$/;"	i
+pytest	tests/test_base_url.py	/^import pytest$/;"	i
+pytest	tests/test_conferences.py	/^import pytest$/;"	i
+pytest	tests/test_events.py	/^import pytest$/;"	i
+quote_plus	config.py	/^from urllib.parse import quote_plus$/;"	i
+r	import_airtable_data.py	/^r = requests.get(url, headers=headers)$/;"	v
+r	tests/tests.py	/^r = requests.post(url, data=json.dumps({'events':event}))$/;"	v
+re	mail.py	/^import re$/;"	i
+regen_api_key	api.py	/^async def regen_api_key(req, resp):$/;"	f
+requests	import_airtable_data.py	/^import requests$/;"	i
+requests	mail.py	/^import requests$/;"	i
+requests	send_notifications.py	/^import requests$/;"	i
+requests	tests/tests.py	/^import requests$/;"	i
+responder	api.py	/^import responder$/;"	i
+secrets	key_gen.py	/^import secrets$/;"	i
+sendMessage	mail.py	/^    def sendMessage(self):$/;"	m	class:mailGunEmailData
+send_confirmation_email	mail.py	/^def send_confirmation_email(to, api_key):$/;"	f
+send_reset_key_email	mail.py	/^def send_reset_key_email(to, reset_key):$/;"	f
+service	tests/test_base_url.py	/^import api as service$/;"	i
+service	tests/test_conferences.py	/^import api as service$/;"	i
+service	tests/test_events.py	/^import api as service$/;"	i
+test	api.py	/^def test(req, resp):$/;"	f
+test_base_url	tests/test_base_url.py	/^def test_base_url(api):$/;"	f
+test_get_all_conferences	tests/test_conferences.py	/^def test_get_all_conferences(api):$/;"	f
+test_get_event	tests/test_events.py	/^def test_get_event(api):$/;"	f
+test_get_one_conference	tests/test_conferences.py	/^def test_get_one_conference(api):$/;"	f
+test_subscribe_to_event	tests/test_events.py	/^def test_subscribe_to_event(api):$/;"	f
+update_db_data	mongo.py	/^def update_db_data(collection, data, **kwargs):$/;"	f
+url	import_airtable_data.py	/^url = AIRTABLE_URL$/;"	v
+url	tests/tests.py	/^url = 'http:\/\/localhost:5042\/events\/5cbfa011127c6adabe9bfcb3'$/;"	v

@@ -16,6 +16,7 @@ def jsonify_results(funct):
 
     return inner
      
+
 @jsonify_results
 def get_db_items(collection, **kwargs):
     collection = db[collection]
