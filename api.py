@@ -38,7 +38,7 @@ class ConferenceById:
         request_media = await req.media(format='json')
         resp.media = get_db_items('conferences', _id=insert_id)
 
-    def on_get(self, req, resp):
+    def on_get(self, req, resp, *, conference_id):
         resp.media = get_db_items('conferences', _id=conference_id) 
 
 
@@ -59,19 +59,14 @@ class Events:
         resp.media = get_db_items('events', _id=response_id)
 
 
-@api.route("/conferences/{conference_id}")
-def conference_by_id(req, resp, *, conference_id):
-    resp.media = get_db_items('conferences', _id=conference_id) 
-
-
 @api.route("/user")
-async def add_user(req, resp):
+async def AddUser(req, resp):
 
     @api.background.task
-    def confirmation_email(data):
+    def confirmation_email(self, data):
         send_confirmation_email(data) 
 
-    if req.method == 'post':
+    async def on_post(self, req, resp):
         request_media = await req.media(format='json')
         email_address = request_media['email']
 
@@ -80,31 +75,33 @@ async def add_user(req, resp):
             request_media['api_key'] = api_key
             insert_id = load_db_data('users', request_media)['$oid']
             resp.media = get_db_items('users', _id=insert_id)
-            confirmation_email(resp.media[0])    
+            self.confirmation_email(resp.media[0])    
         
         else:
             resp.text = f'Email Account {email_address} already exists'
             resp.status_code = 400
 
-    elif req.headers['Authorization']:
-        resp.media = get_db_items('users', filter_by={'api_key':req.headers['Authorization']})
+    def on_get(self, req, resp):
+        """Uses your api key to retrieve your user information."""
+        resp.media = get_db_items('users', filter_by={'api_key':req.headers['Authorization']}) 
+
+
+@api.route('/event/{event_id}')
+def get_event_by_id(req, resp, *, event_id):
+    resp.media = get_db_items('events', _id=event_id)
 
 @api.route('/event/{event_id}/subscribe')
-async def user_subscribe_to_event(req, resp, *, event_id):
-    if req.method != 'post':
-        resp.status_code = 401
-        method = req.method.upper()
-        resp.content = f'invalid request type {method}'
+class UserSubcribeToEvent:
+    async def on_post(self, req, resp, *, event_id):
+        user_info = get_db_items('users', filter_by={'api_key': req.headers['Authorization']})
+        subscription_data = await req.media(format='json')
+        resp.media = update_db_data(
+                'events',
+                _id=event_id,
+                data={'$push': {'subscribers': {user_info[0]['email']: subscription_data}}})
+
         
-    user_info = get_db_items('users', filter_by= {'api_key': req.headers['Authorization']})
-    request_media = await req.media(format='json') 
-    print(event_id)
-"""
-update_db_data('events',
-            _id=event_id,
-            data={'$push': {'subscribers': user_info['email']}})
-"""
-api.route("/user/api_regen")
+@api.route("/user/api_regen")
 async def regen_api_key(req, resp):
     if 'authorization_key' in req.params:
         data = get_db_items('users', filter_by={'api_reset.key': req.params['authorization_key']})
