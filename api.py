@@ -4,6 +4,7 @@ from mongo import (
         load_db_data,
         update_db_data,
         )
+
 from mail import (
         send_confirmation_email,
         send_reset_key_email,
@@ -14,7 +15,19 @@ import json
 import responder
 import maya
 
-api = responder.API()
+contact = {
+        'name': 'Productivity in Tech',
+        'url': 'https://productivityintech.com',
+        'email': 'info@productivityintech.com',
+        }
+
+api = responder.API(
+        title='Conftalks API',
+        version='0.1',
+        openapi='3.0.1',
+        docs_route='/docs',
+        contact=contact,
+        )
 
 
 @api.route("/")
@@ -60,13 +73,15 @@ class Events:
 
 
 @api.route("/user")
-async def AddUser(req, resp):
+async def User(req, resp):
+    """Creates, or Retrieves User Data"""
 
-    @api.background.task
     def confirmation_email(self, data):
+        """sends confirmation email via mailgun"""
         send_confirmation_email(data) 
 
     async def on_post(self, req, resp):
+        """Creates User Account"""
         request_media = await req.media(format='json')
         email_address = request_media['email']
 
@@ -114,7 +129,7 @@ async def regen_api_key(req, resp):
                 'users', 
                 filter_by={'email': email},
                 data={'$set': {'api_reset': {'key': generate_api_key(35),
-                    'expiration': maya.now().add(minutes=5).rfc2822()}}},
+                    'expiration': maya.now().add(minutes=5).datetime()}}},
                 )['api_reset']
 
         @api.background.task

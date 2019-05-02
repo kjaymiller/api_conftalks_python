@@ -20,6 +20,7 @@ maya = "*"
 responder = "*"
 markdown = "*"
 pytest = "*"
+marshmallow = "*"
 
 [requires]
 python_version = "3.7"
