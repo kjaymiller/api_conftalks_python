@@ -8,7 +8,7 @@ client = MongoClient(os.environ['MONGODB_URI'])
 db = client.get_database()
 
 
-def jsonify_results(funct):
+def jsonify(funct):
     def inner(*args, **kwargs):
         f = funct(*args, **kwargs)
         bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
@@ -17,7 +17,7 @@ def jsonify_results(funct):
     return inner
      
 
-@jsonify_results
+@jsonify
 def get_db_items(collection, **kwargs):
     collection = db[collection]
     if kwargs.get('_id'):
@@ -31,7 +31,7 @@ def get_db_items(collection, **kwargs):
         return collection.find()
 
 
-@jsonify_results
+@jsonify
 def update_db_data(collection, data, **kwargs):
     collection = db[collection]
     if kwargs.get('_id'):
