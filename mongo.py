@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 from bson.objectid import ObjectId
 from bson.json_util import dumps, RELAXED_JSON_OPTIONS
 import json
@@ -16,30 +16,35 @@ def jsonify(funct):
 
     return inner
      
-
 @jsonify
-def get_db_items(collection, **kwargs):
+def get_db_items(collection, _id=False, filter_by=False):
     collection = db[collection]
-    if kwargs.get('_id'):
-        print(kwargs.get('_id'))
-        return collection.find_one({'_id': ObjectId(kwargs.get('_id'))})
+    if _id:
+        response = collection.find_one({'_id': ObjectId(_id)})
     
-    elif kwargs.get('filter_by'):
-        return collection.find(kwargs.get('filter_by'))
+    elif filter_by:
+        response = collection.find(filter_by)
 
     else: 
-        return collection.find()
+        response = collection.find()
 
+    print(response)
+    return response
 
 @jsonify
-def update_db_data(collection, data, **kwargs):
+def update_db_data(collection, data, _id=False, filter_by=None):
     collection = db[collection]
-    if kwargs.get('_id'):
-        return collection.update({'_id': ObjectId(kwargs.get('_id'))}, data)
+    if _id:
+        filter = {'_id': ObjectId(_id)}
 
     else:
-        return collection.update(kwargs.get('filter_by'), data)
+        filter = filter_by
 
+    return collection.find_one_and_update(filter, data,
+            return_document=ReturnDocument.AFTER)
+        
+
+@jsonify
 def load_db_data(collection, json_obj):
     collection = db[collection]
     return collection.insert_one(json_obj).inserted_id

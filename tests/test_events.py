@@ -9,8 +9,8 @@ def api():
 
 def test_get_event(api):
     """TODO: Mock Database Call"""
-    r = api.requests.get('/event/5cc905e48acb082e9712a9e3')
-    assert r.json()['_id'] == {'$oid': '5cc905e48acb082e9712a9e3'}
+    r = api.requests.get('/event/5cccb212ac5b0e0c0c4a46ce')
+    assert r.json()['_id'] == {'$oid': '5cccb212ac5b0e0c0c4a46ce'}
 
 def test_subscribe_to_event(api):
     """TODO: Mock Database Call"""

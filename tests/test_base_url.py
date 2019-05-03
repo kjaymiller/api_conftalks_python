@@ -8,4 +8,4 @@ def api():
 
 def test_base_url(api):
     r = api.requests.get('/')
-    assert r.text == 'Hello from Conftalks'
+    assert r.status_code == 200

@@ -38,7 +38,7 @@ api = responder.API(
 
 @api.schema('Conference')
 class ConferenceSchema(Schema):
-    id = fields.String()
+    id = fields.String(attribute="_id.$oid", data_key="_id.$oid")
     url = fields.String()
     name = fields.String()
 
@@ -101,7 +101,10 @@ class ConferenceById:
         """Creates New Conference Item"""
         request_media = await req.media(format='json')
         insert_id = load_db_data('conferences', request_media)['$oid']
-        resp.media = get_db_items('conferences', _id=insert_id)
+        conference_data = get_db_items('conferences', _id=insert_id)
+        conferences = ConferenceSchema()
+        resp.media = conferences.dump(conference_data)
+
 
     async def on_put(self, req, resp, *, conference_id):
         """Updates an Existing Conference Item"""
@@ -110,7 +113,9 @@ class ConferenceById:
 
     def on_get(self, req, resp, *, conference_id):
         """Returns a single conference item""" 
-        resp.media = get_db_items('conferences', _id=conference_id) 
+        conference_data = get_db_items('conferences', _id=conference_id)
+        conferences = ConferenceSchema()
+        resp.media = conferences.dump(conference_data)
 
 
 @api.route('/events')
@@ -196,12 +201,15 @@ def get_event_by_id(req, resp, *, event_id):
 @api.route('/event/{event_id}/subscribe')
 class UserSubcribeToEvent:
     async def on_post(self, req, resp, *, event_id):
-        user_info = get_db_items('users', filter_by={'api_key': req.headers['Authorization']})
+        user_info = get_db_items(
+                'users', 
+                filter_by={'api_key': req.headers['Authorization']})[0]
+
         subscription_data = await req.media(format='json')
         resp.media = update_db_data(
                 'events',
                 _id=event_id,
-                data={'$push': {'subscribers': {user_info[0]['email']: subscription_data}}})
+                data={'$push': {'subscribers': {user_info['email']: subscription_data}}})
 
         
 @api.route("/user/api_regen")
