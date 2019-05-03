@@ -29,5 +29,9 @@ def get_upcoming_emails():
 
 
 if __name__=="__main__":
-    print(get_upcoming_emails())
-    
+    upcoming_emails = get_upcoming_emails()
+
+        for email in upcoming_emails:
+            for user in email['users']:
+                send_event_email(user)    
+

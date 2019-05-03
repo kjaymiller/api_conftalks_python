@@ -69,8 +69,7 @@ def send_confirmation_email(to, api_key):
             tags=['api_key', 'confirmation'],
             ).sendMessage().url)
 
-
-def send_reset_key_email(to, conference, event, reminder):
+def send_event_email(to, conference, event, reminder):
     subject = 'Reset your api key - Conftalks.dev' 
     emails = {}
     
@@ -88,4 +87,24 @@ def send_reset_key_email(to, conference, event, reminder):
             text=emails['.txt'],
             html=Markdown(emails['.md']),
             tags=['reminder', 'event'],
+            ).sendMessage())
+
+def send_reset_key_email(to, reset_key):
+    subject = 'Reset your api key - Conftalks.dev' 
+    email_template = 'reset_key_request_email'
+    
+    for base_template in email_templates(email_template):
+        template = Template(base_template['base_template']) 
+        emails[base_template] = template.render(
+                expiration=reset_key['expiration'],
+                reset_link=os.environ['RESET_LINK'], 
+                authorization_key=reset_key['key'],
+                )
+
+    return mailGunEmailData( 
+            to=to,
+            subject=subject,
+            text=emails['.txt'],
+            html=Markdown(emails['.md']),
+            tags=['api_key', 'reset', 'confirmation'],
             ).sendMessage())
