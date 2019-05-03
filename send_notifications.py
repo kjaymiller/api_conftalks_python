@@ -1,6 +1,6 @@
 """Schedule Emails That will Go Out that Day"""
 from mongo import db, jsonify
-from mail import send_event_email
+from mail import email_template, sendMessage
 
 import maya
 import requests

@@ -5,106 +5,100 @@ from pathlib import Path
 import requests
 import os
 import re
-from dataclasses import dataclass, field
+import json
 
 
-def email_templates(filename, markdown='.md', text='.txt'):
+def email_templates(filename, markdown='.md', text='.txt', **kwargs):
     templates = {} 
-    for extension in (markdown, text)
+    
+    for extension in (markdown, text):
         file_path = Path(f"{os['MAIL_TEMPLATES_DIR']}/{filename}{extension}")
+
         if file_path.isfile():
-            templates[extension] = (file_path.read())
-        )
+            template = Template(file_path.open().read())
+            
+            if file_path.suffix() == '.md':
+                template[extension] = Markdown(template.render(**kwargs))
+            
+            else:
+                template[extension] = template.render(**kwargs)
 
     return templates
 
+def sendMessage(
+        to,
+        FROM,
+        subject,
+        emails,
+        API_KEY=os.environ['MAILGUN_API_KEY'],
+        url=os.environ['MAILGUN_URL'],
+        tags=[],
+        tracking=True,
+        ):
 
-@dataclass
-class mailGunEmailData:
-    to: str
-    subject: str
-    text: str
-    html: str
-    url: str = os.environ['MAILGUN_URL']
-    tags: list = field(default_factory=list) 
-    API_KEY: str = os.environ['MAILGUN_API_KEY']
-    FROM: str = os.environ['MAILGUN_ADMIN_EMAIL']
-    tracking: bool = True
-    
-    def mail_gun_email_data(self):
-        return {
-            'to': self.to,
-            'from': self.FROM,
-            'subject': self.subject,
-            'text': self.text,
-            'html': self.html,
-            'tracking': self.tracking,
-            'o:tag': self.tags,
-            }
+    recipient_variables = {}
+    for user in to:
+        recipient_variables[user]={'test': 'test'}
 
-    def sendMessage(self):
-        return requests.post(
-                self.url,
-                auth=('api', self.API_KEY), 
-                data=self.mail_gun_email_data())
+    email_data = {
+        'to': to,
+        'from': FROM,
+        'subject': subject,
+        'text': emails['.txt'],
+        'html': emails['.md'],
+        'tracking': tracking,
+        'recipient-variables': json.dumps(recipient_variables),
+        'o:tag': tags,
+        }
+
+    return requests.post(
+            url,
+            auth=('api', API_KEY), 
+            data=email_data,
+            )
                 
 
 # Authentication
 def send_confirmation_email(to, api_key):
     subject = 'Welcome to Conftalks - Your Conftalks API Key'
-    with open('./email_templates/confirmation_email.md') as md_file:
-        raw_markdown = md_file.read()
-        md_email = re.sub(r'{{API_KEY}}', api_key, raw_markdown)
-        html = markdown(md_email)
 
-    with open('./email_templates/confirmation_email.txt') as txt_email:
-        raw_text = txt_email.read()
-        text = re.sub(r'{{API_KEY}}', api_key, raw_text)
-
-    print(mailGunEmailData( 
+    return sendMessage( 
             to=to,
             subject=subject,
-            text=text,
-            html=html,
-            tags=['api_key', 'confirmation'],
-            ).sendMessage().url)
+            emails = email_templates('email_notification', api_key=api_key),
+            tags=['reminder', 'event'],
+            ).sendMessage()
+
 
 def send_event_email(to, conference, event, reminder):
-    subject = 'Reset your api key - Conftalks.dev' 
-    emails = {}
-    
-    for base_template in email_templates('email_notification'):
-        template = Template(base_template['base_template']) 
-        emails[base_template] = template.render(
-                conference=conference,
-                event=event, 
-                reminder=reminder,
-                )
+    subject = f'conference'
 
     return mailGunEmailData( 
             to=to,
             subject=subject,
+            emails = email_templates(
+                    'email_notification',
+                    conference=conference,
+                    event=event, 
+                    reminder=reminder,
+                    ),
             text=emails['.txt'],
-            html=Markdown(emails['.md']),
+            html=emails['.md'],
             tags=['reminder', 'event'],
-            ).sendMessage())
+            ).sendMessage()
+
 
 def send_reset_key_email(to, reset_key):
     subject = 'Reset your api key - Conftalks.dev' 
-    email_template = 'reset_key_request_email'
     
-    for base_template in email_templates(email_template):
-        template = Template(base_template['base_template']) 
-        emails[base_template] = template.render(
-                expiration=reset_key['expiration'],
-                reset_link=os.environ['RESET_LINK'], 
-                authorization_key=reset_key['key'],
-                )
-
     return mailGunEmailData( 
             to=to,
             subject=subject,
-            text=emails['.txt'],
-            html=Markdown(emails['.md']),
+            emails = email_template(
+                    'reset_key_request_email',
+                    expiration=reset_key['expiration'],
+                    reset_link=os.environ['RESET_LINK'], 
+                    authorization_key=reset_key['key'],
+                    ),
             tags=['api_key', 'reset', 'confirmation'],
-            ).sendMessage())
+            ).sendMessage()
