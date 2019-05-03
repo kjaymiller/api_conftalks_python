@@ -34,15 +34,16 @@ def sendMessage(
         url=os.environ['MAILGUN_URL'],
         tags=[],
         tracking=True,
+        *args,
         ):
 
     recipient_variables = {}
     for user in to:
-        recipient_variables[user]={'test': 'test'}
+        {user['email'] = {key: user[key] for key in args}}
 
     email_data = {
         'to': to,
-        'from': FROM,
+        'from': FROM['email'],
         'subject': subject,
         'text': emails['.txt'],
         'html': emails['.md'],
