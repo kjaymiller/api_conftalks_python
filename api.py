@@ -22,6 +22,7 @@ contact = {
         'url': 'https://productivityintech.com',
         'email': 'info@productivityintech.com',
         }
+
 api_description = '''This is the Conftalks.dev Public API. It is used to manage
 your alerts!
 '''
@@ -36,12 +37,21 @@ api = responder.API(
         description=api_description,
         )
 
-@api.schema('Conference')
+@api.schema('Event')
 class ConferenceSchema(Schema):
-    id = fields.String(attribute="_id.$oid", data_key="_id.$oid")
-    url = fields.String()
-    name = fields.String()
+    id = fields.Str(attribute="_id.$oid")
+    conference = fields.Str()
+    url = fields.Str()
+    name = fields.Str()
+    start_date = fields.Str(attribute="events.event_start")
+    end_date = fields.Str(attribute="events.event_end")
 
+
+@api.schema('Conference')
+class EventSchema(Schema):
+    id = fields.Str(attribute="_id.$oid", data_key="_id.$oid")
+    url = fields.Str()
+    name = fields.Str()
 
 @api.route("/conferences")
 def conferences(req, resp):
@@ -60,7 +70,7 @@ def conferences(req, resp):
     """
     conference_data = get_db_items('conferences')
     conferences = ConferenceSchema(many=True)
-    resp.media = conferences.dump(conference_data)
+    resp.media = conferences.dump(conference_data).data
 
 
 @api.route('/conferences/{conference_id}')
@@ -100,10 +110,10 @@ class ConferenceById:
     async def on_post(self, req, resp, *, conference_id):
         """Creates New Conference Item"""
         request_media = await req.media(format='json')
-        insert_id = load_db_data('conferences', request_media)['$oid']
+        insert_id = load_db_data('conferences', request_media)
         conference_data = get_db_items('conferences', _id=insert_id)
         conferences = ConferenceSchema()
-        resp.media = conferences.dump(conference_data)
+        resp.media = conferences.dump(conference_data).data
 
 
     async def on_put(self, req, resp, *, conference_id):
@@ -114,11 +124,9 @@ class ConferenceById:
     def on_get(self, req, resp, *, conference_id):
         """Returns a single conference item""" 
         conference_data = get_db_items('conferences', _id=conference_id)
-        conferences = ConferenceSchema()
-        resp.media = conferences.dump(conference_data)
+        conferences = ConferenceSchema().dump(conference_data)
+        resp.media = conferences.data
 
-
-@api.route('/events')
 class Events:
     """
     ---
@@ -147,22 +155,25 @@ class Events:
         """Return Latest Events Limited by Limit Request.
         TODO: Restrict calls not using a filter.
         """
-        resp.media = get_db_items('conferences')
+        event_data = EventSchema(get_db_items('conferences'))
+        resp.media = event_data
 
     async def on_post(self, req, resp):
         """Add an event to the events collection.
         TODO: Bulk Add Events.
+        TODO: Lock Update with API_KEY.
+        If the event exists the content will be overridden.
         """
+
         request_media = await req.media(format='json')
         
         #convert start and end dates to datetime
-        event_start = request_media['events']['event_start']
-        event_end = request_media['events']['event_end']
-        request_media['events']['event_start'] = maya.when(event_start).datetime()
-        request_media['events']['event_end'] = maya.when(event_end).datetime()
+        start_date = maya.when(request_media['start_date']).datetime()
+        event_end = maya.when(request_media['end_date']).datetime()
 
-        response_id = load_db_data('events', request_media)
-        resp.media = get_db_items('events', _id=response_id)
+        response = update_db_data('events', request_media, upsert=True)
+
+        resp.media = EventsSchema(response).data
 
 
 @api.route("/user")

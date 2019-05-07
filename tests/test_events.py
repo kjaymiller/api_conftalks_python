@@ -7,6 +7,11 @@ def api():
     return service.api
 
 
+def test_add_event(api):
+    
+    r = api.requests.post('/event')
+
+
 def test_get_event(api):
     """TODO: Mock Database Call"""
     r = api.requests.get('/event/5cccb212ac5b0e0c0c4a46ce')

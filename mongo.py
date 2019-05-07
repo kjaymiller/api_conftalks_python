@@ -28,11 +28,10 @@ def get_db_items(collection, _id=False, filter_by=False):
     else: 
         response = collection.find()
 
-    print(response)
     return response
 
 @jsonify
-def update_db_data(collection, data, _id=False, filter_by=None):
+def update_db_data(collection, data, _id=False, filter_by=None, upsert=False):
     collection = db[collection]
     if _id:
         filter = {'_id': ObjectId(_id)}
@@ -40,7 +39,10 @@ def update_db_data(collection, data, _id=False, filter_by=None):
     else:
         filter = filter_by
 
-    return collection.find_one_and_update(filter, data,
+    return collection.find_one_and_update(
+            filter, 
+            data, 
+            upsert=upsert,
             return_document=ReturnDocument.AFTER)
         
 

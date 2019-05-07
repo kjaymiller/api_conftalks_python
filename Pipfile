@@ -19,8 +19,10 @@ requests = "*"
 maya = "*"
 responder = "*"
 markdown = "*"
-pytest = "*"
 marshmallow = "*"
 
 [requires]
 python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
