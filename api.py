@@ -38,17 +38,17 @@ api = responder.API(
         )
 
 @api.schema('Event')
-class ConferenceSchema(Schema):
+class EventSchema(Schema):
     id = fields.Str(attribute="_id.$oid")
     conference = fields.Str()
     url = fields.Str()
     name = fields.Str()
-    start_date = fields.Str(attribute="events.event_start")
-    end_date = fields.Str(attribute="events.event_end")
+    start_date = fields.Str(attribute="start_date.$date")
+    end_date = fields.Str(attribute="end_date.$date")
 
 
 @api.schema('Conference')
-class EventSchema(Schema):
+class ConferenceSchema(Schema):
     id = fields.Str(attribute="_id.$oid", data_key="_id.$oid")
     url = fields.Str()
     name = fields.Str()
@@ -127,6 +127,8 @@ class ConferenceById:
         conferences = ConferenceSchema().dump(conference_data)
         resp.media = conferences.data
 
+
+@api.route('/event')
 class Events:
     """
     ---
@@ -155,7 +157,7 @@ class Events:
         """Return Latest Events Limited by Limit Request.
         TODO: Restrict calls not using a filter.
         """
-        event_data = EventSchema(get_db_items('conferences'))
+        event_data = EventSchema(get_db_items('events'))
         resp.media = event_data
 
     async def on_post(self, req, resp):
@@ -168,12 +170,10 @@ class Events:
         request_media = await req.media(format='json')
         
         #convert start and end dates to datetime
-        start_date = maya.when(request_media['start_date']).datetime()
-        event_end = maya.when(request_media['end_date']).datetime()
-
-        response = update_db_data('events', request_media, upsert=True)
-
-        resp.media = EventsSchema(response).data
+        request_media['start_date'] = maya.when(request_media['start_date']).datetime()
+        request_media['end_date'] = maya.when(request_media['end_date']).datetime()
+        response = load_db_data('events', request_media)
+        resp.media = EventSchema().dump(get_db_items('events', _id=response['$oid'])).data
 
 
 @api.route("/user")
