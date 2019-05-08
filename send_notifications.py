@@ -1,9 +1,8 @@
 """Schedule Emails That will Go Out that Day"""
 from mongo import db, jsonify
-from mail import email_template, sendMessage
+from mail import send_event_email
 
 import maya
-import requests
 import os
 
 
@@ -21,8 +20,8 @@ def mongo_dates_between(date_range=1):
 def get_upcoming_emails():
     todays_events = collection.find({
         "$or": [
-            {'events.event_start': mongo_dates_between()},
-            {'events.event_end': mongo_dates_between()}
+            {'start_date': mongo_dates_between()},
+            {'end_date': mongo_dates_between()},
             ]
         })
     return todays_events
@@ -30,8 +29,10 @@ def get_upcoming_emails():
 
 if __name__=="__main__":
     upcoming_emails = get_upcoming_emails()
+    print(upcoming_emails)
 
-        for email in upcoming_emails:
-            for user in email['users']:
-                send_event_email(user)    
+    for email in upcoming_emails:
+        for user in email['subscribers']:
+            print(user)
+            send_event_email(user)    
 

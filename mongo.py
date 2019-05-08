@@ -15,13 +15,18 @@ def jsonify(funct):
         return json.loads(bson_data)
 
     return inner
-     
+
+
 @jsonify
-def get_db_items(collection, _id=False, filter_by=False):
+def get_db_data(collection, _id=False, filter_by=False, return_one=False):
     collection = db[collection]
+
     if _id:
         response = collection.find_one({'_id': ObjectId(_id)})
-    
+
+    elif filter_by and return_one:
+        response = collection.find_one(filter_by)
+
     elif filter_by:
         response = collection.find(filter_by)
 
