@@ -52,9 +52,10 @@ class EventSchema(Schema):
     url = fields.Str()
     name = fields.Str()
     start_date = fields.Str(attribute="start_date.$date")
+    start_reminders = fields.List(fields.String)
     end_date = fields.Str(attribute="end_date.$date")
-    subscribe = fields.Boolean()
-
+    end_reminders = fields.List(fields.String)
+    subscribed = fields.Boolean()
 
 
 @api.schema('Conference')
@@ -250,6 +251,7 @@ async def User(req, resp):
 @api.route('/event/{event_id}')
 def get_event_by_id(req, resp, *, event_id):
     response = get_db_data('events', _id=event_id)
+    response['subscribed'] = req.headers['user_data']['email'] in response.get('subscribed_users', [])
     event_data = EventSchema().dump(response).data
     resp.media=event_data
     
@@ -259,7 +261,50 @@ class UserSubcribeToEvent:
     """
     ---
     put:
-        description: Subscribes a user to an event.
+        description: | 
+            # Subscribes a user to an event.
+            _reminder_times_ are calculated based on the ORIGINAL time.
+
+
+            ```
+            # equates to 1 day AFTER the start_date
+            'start_reminder': {
+                'interval': 'days', # or 'weeks'
+                'amount': 1,
+                } 
+            ```
+
+            optional 2nd/3rd reminders are based off the original date and not previous alerts. 
+            If no _second_/_third_start_reminder_ is given, those reminders will be omitted.
+             
+            ```
+            # equates to 2 weeks from the ORIGINAL Start Date
+            'second_start_reminder': {
+                'interval': 'weeks', 
+                'amount': 2,
+                }, 
+            ```
+
+            # End Date reminders work the same way but SUBTRACT From the end date
+
+            ``` 
+            # equates to 1 day BEFORE the end date.
+            'end_reminder': {
+                'interval': 'days', # or 'weeks'
+                'amount': 1,
+                }, 
+            ```
+
+            optional 2nd/3rd reminders are based off the original date and not previous alerts. 
+            If no second/third_start_reminder, it will be omitted.
+
+            ```
+            # equates to 2 weeks from the ORIGINAL Date
+            'second_start_reminder': {
+                'interval': 'weeks', 
+                'amount': 2,
+                }, 
+
         responses:
             200:
                 description: Success - Adds user to subscribed list
@@ -269,21 +314,38 @@ class UserSubcribeToEvent:
                             $ref: '#/components/schemas/Event'
     """
 
-    def on_put(self, req, resp, *, event_id):
-        data={'$addToSet': {'subscribers': req.headers['user_data']['email']}}
+    async def on_put(self, req, resp, *, event_id):
+        request_media = await req.media(format="json")
+        event_data = get_db_data('events', _id=event_id)
+        start_date = maya.when(event_data['start_date']['$date']).datetime()
+        start_reminders = [start_date]
+        for reminder in request_media.get('start_reminders', []):
+            days =  reminder['amount'] if reminder['interval'] == 'days' else 0 
+            weeks = reminder['amount'] if reminder['interval'] == 'weeks' else 0
+            start_reminders.append(maya.when(start_date).add(days=days, weeks=weeks).datetime())
+
+        end_date = maya.when(event_data['end_date']['$date']).datetime()
+        end_reminders = [end_date]
+        for reminder in request_media.get('end_reminders', []):
+            days =  reminder['amount'] if reminder['interval'] == 'days' else 0 
+            weeks = reminder['amount'] if reminder['interval'] == 'weeks' else 0
+            start_reminders.append(maya.when(end_date).sub(days=days, weeks=weeks).datetime())
+
+        response_data={'$addToSet': 
+                {'subscribers': 
+                    {req.headers['user_data']['email']: 
+                        {"start_reminders": start_reminders,
+                            "end_reminders": end_reminders,
+                            }
+                        }
+                    }
+                }
+
         response = update_db_data(
                 'events',
                 _id=event_id,
-                data=data,
+                data=response_data,
                 )
-
-        start_date = response['start_date']
-        second_start_reminder = maya.when(response['start_date']).add(days=req.media['start_reminders'][0]['days_interval'], weeks=req.media['start_reminders'][0]['weeks_interval']).rfc2822()
-        third_start_reminder = maya.when(response['start_date']).add(days=req.media['start_reminders'][1]['days_interval'], weeks=req.media['start_reminders'][1]['weeks_interval']).rfc2822()
-
-        end_date = response['end_date']
-        second_end_reminder = maya.when(response['start_date']).sub(days=req.media['start_reminders']['days_interval'], weeks=req.media['start_reminders']['weeks_interval']).rfc2822()
-        third_end_reminder = maya.when(response['start_date']).sub(days=req.media['start_reminders']['days_interval'], weeks=req.media['start_reminders']['weeks_interval']).rfc2822()
 
         resp.media = EventSchema().dump(response).data
 
