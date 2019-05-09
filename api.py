@@ -220,7 +220,7 @@ class Events:
 
 
 @api.route("/user")
-async def User(req, resp):
+class User(req, resp):
     """Creates, or Retrieves User Data"""
 
     def confirmation_email(self, data):
@@ -247,6 +247,11 @@ async def User(req, resp):
         """Uses your api key to retrieve your user information."""
         resp.media = get_db_data('users', filter_by={'api_key':req.headers['Authorization']}) 
 
+
+    async def on_put(self, req, resp):
+        """Updates Your User Account"""
+        request_media = await req.media(format='json')
+        resp.media = update_db_data('users', filter_by=req.headers['user_data'], data=data)
 
 @api.route('/event/{event_id}')
 def get_event_by_id(req, resp, *, event_id):
