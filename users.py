@@ -5,6 +5,12 @@ from mongo import (
         load_db_data,
         update_db_data,
         )
+from mail import (
+        send_confirmation_email,
+        send_reset_key_email,
+        )
+
+from key_gen import generate_api_key
 from schemas import UserSchema
 
 @api.route("/user")
