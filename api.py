@@ -220,7 +220,7 @@ class Events:
 
 
 @api.route("/user")
-class User(req, resp):
+class User:
     """Creates, or Retrieves User Data"""
 
     def confirmation_email(self, data):
