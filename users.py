@@ -9,7 +9,8 @@ from schemas import UserSchema
 
 @api.route("/user")
 class User:
-    """Creates, Updates or Retrieves User Data
+    """
+    Creates, Updates or Retrieves User Data
     ---
     get:
         description: Returns the user data matching the api-key
@@ -17,7 +18,8 @@ class User:
             200:
                 content:
                     application/json:
-                        schema: $ref: '#/components/schemas/User'
+                        schema: 
+                            $ref: '#/components/schemas/User'
     """
 
     def confirmation_email(self, data):
