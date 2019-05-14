@@ -168,5 +168,21 @@ def get_event_by_id(req, resp, *, event_id):
 
 @api.route('/events/')
 def get_events(req, resp):
+    """
+    ---
+    get:
+        description: returns the events for the Authenticated User
+        responses:
+            200:
+                description: Success 
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Event'
+    """
+    
     if req.params.get('subscribed') == 1:
-        resp.media=req.headers['user_data']['subscriptions']
+        subscriptions = req.headers['user_data'].get('subscriptions', {})
+        resp.media = EventsSchema(many=True).dump(
+                subscriptions.map(x, get_db_data('events', _id=x))
+                )
