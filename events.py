@@ -71,6 +71,7 @@ class UserSubcribeToEvent:
                 'interval': 'days', # or 'weeks'
                 'amount': 1,
                 } 
+                
             ```
 
             optional 2nd/3rd reminders are based off the original date and not previous alerts. 
@@ -146,6 +147,14 @@ class UserSubcribeToEvent:
                 data=response_data,
                 )
 
+
+        user_update_data={'$addToSet': {'subscriptions': [event_id]}}
+        update_db_data(
+                'users', 
+                filter_by=req.headers['user_data'],
+                data=user_update_data,
+                )
+
         resp.media = EventSchema().dump(response).data
 
 
@@ -156,3 +165,8 @@ def get_event_by_id(req, resp, *, event_id):
     event_data = EventSchema().dump(response).data
     resp.media=event_data
     
+
+@api.route('/events/')
+def get_events(req, resp):
+    if req.params.get('subscribed') == 1:
+        resp.media=req.headers['user_data']['subscriptions']
