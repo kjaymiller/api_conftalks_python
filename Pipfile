@@ -11,6 +11,7 @@ verify_ssl = false
 [dev-packages]
 pytest = "*"
 requests = "*"
+pytest-mock = "*"
 
 [packages]
 gunicorn = "*"
