@@ -1,4 +1,6 @@
 from api import api
+from pymongo import ASCENDING as pymongo_ASCENDING 
+from pymongo import DESCENDING as pymongo_DESCENDING
 from mongo import (
         db,
         get_db_data,
@@ -166,12 +168,29 @@ def get_event_by_id(req, resp, *, event_id):
     resp.media=event_data
     
 
-@api.route('/events/')
+@api.route('/events')
 def get_events(req, resp):
     """
     ---
     get:
         description: returns the events for the Authenticated User
+        parameters:
+            - in: query
+              name: limit
+              description: The **number of items** to return from the query
+              schema:
+                  type: integer 
+                  default: 10
+
+            - in: query
+              name: sort_key
+              description: Which _date parameter_ to use for filtering by.
+              schema:
+                type: string
+                enum:
+                    - start_date
+                    - end_date
+                default: start_date
         responses:
             200:
                 description: Success 
@@ -180,9 +199,23 @@ def get_events(req, resp):
                         schema:
                             $ref: '#/components/schemas/Event'
     """
+    sorting_options = {
+           'ascending': pymongo_ASCENDING,
+           'descending': pymongo_DESCENDING,
+           }
+    limit = req.params.get('limit', '10')
+    sort_key = req.params.get('sort_key', 'start_date')
+    sort_order = sorting_options[req.params.get('sort_order', 'descending')]
+    sort = (sort_key, sort_order)
+    filter_by = {}
+
+    if req.params.get('conference') == 1:
+        filter_by.update({'conference_id': req.params['conference']})
+        limit = 0
     
-    if req.params.get('subscribed') == 1:
-        subscriptions = req.headers['user_data'].get('subscriptions', {})
-        resp.media = EventsSchema(many=True).dump(
-                subscriptions.map(x, get_db_data('events', _id=x))
-                )
+    if req.params('subscribed') == 1:
+        filter_by.update({'subscribers': req.headers['user_data']['email_address']})
+        limit = 0
+
+    events = get_db_data('events', filter_by=filter_by, sort=sort, limit=limit)
+    resp.media = EventSchema(many=True).dump(events)

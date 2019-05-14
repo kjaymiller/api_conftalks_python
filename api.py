@@ -12,7 +12,9 @@ from mail import (
 
 from key_gen import generate_api_key
 import json
-import responder
+from responder import API
+from apispec import APISpec, yaml_utils
+from apispec.ext.marshmallow import MarshmallowPlugin
 import maya
 
 contact = {
@@ -24,9 +26,49 @@ contact = {
 api_description = '''This is the Conftalks.dev Public API. It is used to manage
 your alerts!
 '''
-        
 
-api = responder.API(
+api_key_scheme = {'type': 'apiKey', 
+                'in': 'header',
+                'name': 'api_key',
+                }
+
+class API(API):
+    @property
+    def _apispec(self):
+
+        info = {}
+        if self.description is not None:
+            info["description"] = self.description
+        if self.terms_of_service is not None:
+            info["termsOfService"] = self.terms_of_service
+        if self.contact is not None:
+            info["contact"] = self.contact
+        if self.license is not None:
+            info["license"] = self.license
+
+        spec = APISpec(
+            title=self.title,
+            version=self.version,
+            openapi_version=self.openapi_version,
+            plugins=[MarshmallowPlugin()],
+            info=info,
+            )
+        spec.components.security_scheme("api_key", api_key_scheme)
+
+        for route in self.routes:
+            if self.routes[route].description:
+                operations = yaml_utils.load_operations_from_docstring(
+                    self.routes[route].description
+                )
+                spec.path(path=route, operations=operations)
+
+        for name, schema in self.schemas.items():
+            spec.components.schema(name, schema=schema)
+
+
+        return spec
+    
+api = API(
         title='Conftalks API',
         version='0.1',
         openapi='3.0.2',
@@ -34,7 +76,6 @@ api = responder.API(
         contact=contact,
         description=api_description,
         )
-
 
 @api.route(before_request=True)
 def auth_required(req, resp, user_data={}):
@@ -48,4 +89,4 @@ if __name__ == '__main__':
     from events import *
     from users import *
     from conferences import *
-    api.run()
+    api.run(debug=True)

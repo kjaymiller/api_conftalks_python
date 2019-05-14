@@ -11,6 +11,13 @@ db = client.get_database()
 def jsonify(funct):
     def inner(*args, **kwargs):
         f = funct(*args, **kwargs)
+
+        if kwargs.get('sort'):
+            f = f.sort(kwargs['sort'])
+
+        if kwargs.get('limit'):
+            f = f.limit(kwargs['limit']) 
+
         bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
         return json.loads(bson_data)
 
@@ -18,25 +25,26 @@ def jsonify(funct):
 
 
 @jsonify
-def get_db_data(collection, _id=False, filter_by=False, return_one=False):
+def get_db_data(collection, _id=False, filter_by=False, return_one=False,
+        **kwargs):
     collection = db[collection]
 
     if _id:
-        response = collection.find_one({'_id': ObjectId(_id)})
+        response = collection.find_one({'_id': ObjectId(_id)}, **kwargs)
 
     elif filter_by and return_one:
-        response = collection.find_one(filter_by)
+        response = collection.find_one(filter_by, **kwargs)
 
     elif filter_by:
-        response = collection.find(filter_by)
+        response = collection.find(filter_by, **kwargs)
 
     else: 
-        response = collection.find()
+        response = collection.find({}, **kwargs)
 
     return response
 
 @jsonify
-def update_db_data(collection, data, _id=False, filter_by=None, upsert=False):
+def update_db_data(collection, data, _id=False, filter_by=None, **kwargs):
     collection = db[collection]
     if _id:
         filter = {'_id': ObjectId(_id)}
@@ -47,8 +55,8 @@ def update_db_data(collection, data, _id=False, filter_by=None, upsert=False):
     return collection.find_one_and_update(
             filter, 
             data, 
-            upsert=upsert,
-            return_document=ReturnDocument.AFTER)
+            return_document=ReturnDocument.AFTER,
+            **kwargs)
         
 
 @jsonify
