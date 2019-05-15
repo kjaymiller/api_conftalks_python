@@ -42,10 +42,6 @@ class ConferenceById:
                 type: string
               required: true
             
-            - in: header
-              name: api_key
-              schema:
-                $ref: '#/components/securitySchemes/api_key'
         responses:
             200:
                 description: Success
@@ -80,7 +76,7 @@ class ConferenceById:
         insert_id = load_db_data('conferences', request_media)
         conference_data = get_db_data('conferences', _id=insert_id)
         conferences = ConferenceSchema()
-        resp.media = conferences.dump(conference_data).data
+        resp.media = conferences.dump(conference_data)
 
     async def on_put(self, req, resp, *, conference_id):
         """Updates an Existing Conference Item"""
@@ -99,8 +95,7 @@ class ConferenceById:
             conference_data['subscribed'] = False
 
         conferences = ConferenceSchema().dump(conference_data)
-        resp.media = conferences.data
-
+        resp.media = conferences 
 
 @api.route('/subscribe/conference/{conference_id}')
 class SubscribeToConference:

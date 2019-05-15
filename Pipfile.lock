@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a610a2c205e6341c30a74f642b93305db8e4a9e1b3db4a0f511e49cae169a42e"
+            "sha256": "8388eb14c801a1d32b30285c2a1e7e82343c5d37c052ed21d9511073d8ba4522"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -490,6 +490,13 @@
             ],
             "version": "==3.0.4"
         },
+        "faker": {
+            "hashes": [
+                "sha256:1c0a5e7bb54d2c54569986a27124715c83899e592d8d61d4e372dbff6c699573",
+                "sha256:60477f757a80f665bbe1fb3d1cfe5d205ec7b99d5240114de7b27b4c25d236ca"
+            ],
+            "version": "==1.0.7"
+        },
         "idna": {
             "hashes": [
                 "sha256:c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407",
@@ -527,6 +534,13 @@
             "index": "pypi",
             "version": "==4.5.0"
         },
+        "pytest-faker": {
+            "hashes": [
+                "sha256:6b37bb89d94f96552bfa51f8e8b89d32addded8ddb58a331488299ef0137d9b6"
+            ],
+            "index": "pypi",
+            "version": "==2.0.0"
+        },
         "pytest-mock": {
             "hashes": [
                 "sha256:43ce4e9dd5074993e7c021bb1c22cbb5363e612a2b5a76bc6d956775b10758b7",
@@ -534,6 +548,13 @@
             ],
             "index": "pypi",
             "version": "==1.10.4"
+        },
+        "python-dateutil": {
+            "hashes": [
+                "sha256:7e6584c74aeed623791615e26efd690f29817a27c73085b78e4bad02493df2fb",
+                "sha256:c89805f6f4d64db21ed966fda138f8a5ed7a4fdbc1a8ee329ce1b74e3c74da9e"
+            ],
+            "version": "==2.8.0"
         },
         "requests": {
             "hashes": [
@@ -549,6 +570,13 @@
                 "sha256:d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"
             ],
             "version": "==1.12.0"
+        },
+        "text-unidecode": {
+            "hashes": [
+                "sha256:5a1375bb2ba7968740508ae38d92e1f889a0832913cb1c447d5e2046061a396d",
+                "sha256:801e38bd550b943563660a91de8d4b6fa5df60a542be9093f7abf819f86050cc"
+            ],
+            "version": "==1.2"
         },
         "urllib3": {
             "hashes": [

@@ -1,18 +1,18 @@
 import pytest
-import json
-import api as service
+import api as service 
+import conferences
 import mongo
 
 @pytest.fixture
 def api():
     return service.api
 
-def test_get_one_conference(mocker, api):
+def test_get_one_conference(api, mocker, faker):
     """TODO: Mock Database Connection"""
-#    mocker.patch('mongo.jsonify').return_value = {'email': 'kjaymiller@gmail.com', 'id':'5cbfa011127c6adabe9bfcb3'}
+    name = faker.company() 
+    id = faker.password(length=13) 
+    mocker.patch.object('conferences.get_db_data', lambda:{'name': name, '_id': id})
     r = api.requests.get('/conferences/5cbfa011127c6adabe9bfcb3')
-    print(r.status_code)
-    assert r.json()
 
 
 #    def test_get_all_conferences(api):
