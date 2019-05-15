@@ -1,7 +1,7 @@
 import pytest
 import json
 import api as service
-from mongo import get_db_data
+import mongo
 
 @pytest.fixture
 def api():
@@ -9,12 +9,10 @@ def api():
 
 def test_get_one_conference(mocker, api):
     """TODO: Mock Database Connection"""
-    mocker.patch(
-            'mongo.get_db_data', 
-            print('hi!!')
-            )
-    r = api.requests.get('/conferences/8675309')
-    assert r.json()['id'] == '5cbfa011127c6adabe9bfcb3'
+#    mocker.patch('mongo.jsonify').return_value = {'email': 'kjaymiller@gmail.com', 'id':'5cbfa011127c6adabe9bfcb3'}
+    r = api.requests.get('/conferences/5cbfa011127c6adabe9bfcb3')
+    print(r.status_code)
+    assert r.json()
 
 
 #    def test_get_all_conferences(api):

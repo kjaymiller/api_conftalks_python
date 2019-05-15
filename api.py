@@ -27,16 +27,19 @@ api_description = '''This is the Conftalks.dev Public API. It is used to manage
 your alerts!
 '''
 
-api_key_scheme = {'type': 'apiKey', 
+api_key_header = {'type': 'apiKey', 
                 'in': 'header',
-                'name': 'api_key',
+                'name': 'X-API-KEY',
                 }
+
+
 
 class API(API):
     @property
     def _apispec(self):
 
         info = {}
+
         if self.description is not None:
             info["description"] = self.description
         if self.terms_of_service is not None:
@@ -52,8 +55,9 @@ class API(API):
             openapi_version=self.openapi_version,
             plugins=[MarshmallowPlugin()],
             info=info,
+            security=[{"APIKey": []}]
             )
-        spec.components.security_scheme("api_key", api_key_scheme)
+        spec.components.security_scheme("APIKey", api_key_header)
 
         for route in self.routes:
             if self.routes[route].description:
@@ -79,7 +83,7 @@ api = API(
 
 @api.route(before_request=True)
 def auth_required(req, resp, user_data={}):
-    api_key = {'api_key': req.headers.get('authorization')}
+    api_key = {'x-api_key': req.headers.get('authorization')}
     if api_key:
         user_data = get_db_data('users', filter_by=api_key, return_one=True)
         req.headers.update({'user_data': user_data})

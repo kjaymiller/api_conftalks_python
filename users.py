@@ -22,6 +22,8 @@ class User:
         description: Returns the user data matching the api-key
         responses:
             200:
+                security:
+                    - APIKey: []
                 content:
                     application/json:
                         schema: 
@@ -51,6 +53,7 @@ class User:
 
     def on_get(self, req, resp):
         """Uses your api key to retrieve your user information."""
+        print(req.headers)
         resp.media = UserSchema().dump(req.headers['user_data'])
 
     async def on_put(self, req, resp):

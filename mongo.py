@@ -20,7 +20,6 @@ def jsonify(funct):
 
         bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
         return json.loads(bson_data)
-
     return inner
 
 

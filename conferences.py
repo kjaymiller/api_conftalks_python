@@ -25,7 +25,7 @@ def conferences(req, resp):
     """
     conference_data = get_db_data('conferences')
     conferences = ConferenceSchema(many=True)
-    resp.media = conferences.dump(conference_data).data
+    resp.media = conferences.dump(conference_data)
 
 
 @api.route('/conferences/{conference_id}')
@@ -34,6 +34,18 @@ class ConferenceById:
     ---
     get: 
         description: Return the information on a single conference.
+        parameters:
+            - in: path
+              name: conference_id
+              description: The id of the conference that you are wanting to load.
+              schema:
+                type: string
+              required: true
+            
+            - in: header
+              name: api_key
+              schema:
+                $ref: '#/components/securitySchemes/api_key'
         responses:
             200:
                 description: Success
@@ -109,5 +121,5 @@ class SubscribeToConference:
         data={'$push': {'subscribed_users': req.headers['user_data']['email']}}
         response = update_db_data('conferences', data=data, _id=conference_id)
         response['subscribed'] = True
-        resp.media = ConferenceSchema().dump(response).data
+        resp.media = ConferenceSchema().dump(response)
 
