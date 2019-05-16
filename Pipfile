@@ -13,6 +13,7 @@ pytest = "*"
 requests = "*"
 pytest-mock = "*"
 pytest-faker = "*"
+pytest-cov = "*"
 
 [packages]
 gunicorn = "*"
