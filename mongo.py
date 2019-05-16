@@ -19,6 +19,7 @@ def jsonify(funct):
             f = f.limit(kwargs['limit']) 
 
         bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
+        bson_data['id'] = bson_data['id']['$oid'] 
         return json.loads(bson_data)
     return inner
 
