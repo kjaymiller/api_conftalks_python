@@ -1,5 +1,6 @@
 import pytest
 import api as service 
+from faker import Faker
 import conferences
 import mongo
 from random import randint, choice
@@ -17,7 +18,7 @@ def api():
 
 def gen_fake_conference_data():
     name = fake.company() + 'Con' 
-    _id = {'$oid': fake.password(length=13, special_chars=False)}
+    _id = fake.password(length=13, special_chars=False)
     fake_start_datetime = maya.when(
             str(fake.future_date(end_date="+1y")),
             timezone=fake.timezone())
