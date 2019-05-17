@@ -13,7 +13,6 @@ def jsonify(schema):
         def inner(**kwargs):
             f = funct(**kwargs)
             bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
-            schema = kwargs['schema']
             bson_data = json.loads(bson_data)
             return schema.dump(bson_data)
         return inner

@@ -1,12 +1,28 @@
 from api import api
 from mongo import (
-        db,
         get_db_data,
         load_db_data,
         update_db_data,
+        jsonify,
         )
-from schemas import ConferenceSchema
+from schemas import ConferenceSchema as schema
 
+collection = 'conferences'
+
+@jsonify(schema())
+def get_one_conference(_id):
+    return get_db_data(
+        collection=collection,
+        _id=_id,
+        )
+
+@jsonify(schema())
+def get_many_conferences(filter_by: dict={}):
+    return get_db_data(
+        collection=collection,
+        filter_by=filter_by,
+        )
+            
 @api.route("/conferences")
 def conferences(req, resp):
     """
@@ -22,11 +38,7 @@ def conferences(req, resp):
                         schema:
                             $ref: '#/components/schemas/Conference'
     """
-    conference_data = get_db_data(
-            collection='conferences', 
-            schema=ConferenceSchema(many=True),
-            )
-    resp.media = conference_data
+    resp.media = get_many_conferences() # TODO: Add Filter_By from Request Header
 
 
 @api.route('/conferences/{conference_id}')
@@ -87,11 +99,7 @@ class ConferenceById:
 
     def on_get(self, req, resp, *, conference_id):
         """Returns a single conference item""" 
-        conference_data = get_db_data(
-                collection='conferences',
-                schema=ConferenceSchema(), 
-                _id=conference_id,
-                )
+
 ## Removed Subscribed Users Temporarily
  #       if conference_data.get('subscribed_users'):
  #           conference_data['subscribed'] = req.headers['user_data']['email'] in conference_data['subscribed_users']
@@ -99,7 +107,7 @@ class ConferenceById:
  #       else: 
  #           conference_data['subscribed'] = False
 
-        resp.media = conference_data
+        resp.media = get_one_conference(_id=conference_id)
 
 @api.route('/subscribe/conference/{conference_id}')
 class SubscribeToConference:

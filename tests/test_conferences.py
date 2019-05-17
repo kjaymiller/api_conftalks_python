@@ -54,7 +54,7 @@ def test_get_one_conference(api, mocker, fake_conference_data):
     name = fake_conference_data['name']
     
     mocker.patch(
-        'conferences.get_db_data', 
+        'conferences.get_one_conference', 
         lambda **kwargs: fake_conference_data, 
         )
     r = api.requests.get(f'/conferences/{_id}')
@@ -65,10 +65,9 @@ def test_get_one_conference(api, mocker, fake_conference_data):
 
 def test_get_all_conferences(api, mocker, mocked_db_get_many):
     mocker.patch(
-            'conferences.get_db_data',
+            'conferences.get_many_conferences',
             lambda **kwargs: mocked_db_get_many,
             )
 
     r = api.requests.get('/conferences')
-    print(r.json())
-    assert not r
+    assert not r.json()
