@@ -1,5 +1,4 @@
 from mongo import (
-        db,
         get_db_data,
         load_db_data,
         update_db_data,
@@ -80,14 +79,6 @@ api = API(
         contact=contact,
         description=api_description,
         )
-
-@api.route(before_request=True)
-def auth_required(req, resp, user_data={}):
-    api_key = {'x-api_key': req.headers.get('authorization')}
-    if api_key:
-        user_data = get_db_data('users', filter_by=api_key, return_one=True)
-        req.headers.update({'user_data': user_data})
-
 
 if __name__ == '__main__': 
     from events import *

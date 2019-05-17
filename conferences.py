@@ -7,7 +7,6 @@ from mongo import (
         )
 from schemas import ConferenceSchema
 
-
 @api.route("/conferences")
 def conferences(req, resp):
     """
@@ -23,9 +22,11 @@ def conferences(req, resp):
                         schema:
                             $ref: '#/components/schemas/Conference'
     """
-    conference_data = get_db_data('conferences')
-    conferences = ConferenceSchema(many=True)
-    resp.media = conferences.dump(conference_data)
+    conference_data = get_db_data(
+            collection='conferences', 
+            schema=ConferenceSchema(many=True),
+            )
+    resp.media = conference_data
 
 
 @api.route('/conferences/{conference_id}')
@@ -73,7 +74,7 @@ class ConferenceById:
     async def on_post(self, req, resp, *, conference_id):
         """Creates New Conference Item"""
         request_media = await req.media(format='json')
-        insert_id = load_db_data('conferences', request_media)
+        insert_id = load_db_data(collection='conferences', data=request_media)
         conference_data = get_db_data('conferences', _id=insert_id)
         conferences = ConferenceSchema()
         resp.media = conferences.dump(conference_data)
@@ -82,20 +83,23 @@ class ConferenceById:
         """Updates an Existing Conference Item"""
         api_key = req.headers['Authorization']
         request_media = await req.media(format='json')
-        resp.media = get_db_data('conferences', _id=insert_id)
+        resp.media = get_db_data(collection='conferences', _id=insert_id)
 
     def on_get(self, req, resp, *, conference_id):
         """Returns a single conference item""" 
-        conference_data = get_db_data('conferences', _id=conference_id)
-
-        if conference_data.get('subscribed_users'):
-            conference_data['subscribed'] = req.headers['user_data']['email'] in conference_data['subscribed_users']
+        conference_data = get_db_data(
+                collection='conferences',
+                schema=ConferenceSchema(), 
+                _id=conference_id,
+                )
+## Removed Subscribed Users Temporarily
+ #       if conference_data.get('subscribed_users'):
+ #           conference_data['subscribed'] = req.headers['user_data']['email'] in conference_data['subscribed_users']
         
-        else: 
-            conference_data['subscribed'] = False
+ #       else: 
+ #           conference_data['subscribed'] = False
 
-        conferences = ConferenceSchema().dump(conference_data)
-        resp.media = conferences 
+        resp.media = conference_data
 
 @api.route('/subscribe/conference/{conference_id}')
 class SubscribeToConference:

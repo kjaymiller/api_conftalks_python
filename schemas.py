@@ -17,7 +17,7 @@ class EventSchema(Schema):
 
 @api.schema('Conference')
 class ConferenceSchema(Schema):
-    id = fields.Str(attribute="_id.$oid")
+    id = fields.Str(attribute="id.$oid")
     url = fields.Str()
     name = fields.Str()
     subscribed = fields.Boolean()

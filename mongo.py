@@ -8,43 +8,64 @@ client = MongoClient(os.environ['MONGODB_URI'])
 db = client.get_database()
 
 
-def jsonify(funct):
-    def inner(*args, **kwargs):
-        f = funct(*args, **kwargs)
-
-        if kwargs.get('sort'):
-            f = f.sort(kwargs['sort'])
-
-        if kwargs.get('limit'):
-            f = f.limit(kwargs['limit']) 
-
-        bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
-        bson_data['id'] = bson_data['id']['$oid'] 
-        return json.loads(bson_data)
-    return inner
+def jsonify(schema):
+    def decorator(funct):
+        def inner(**kwargs):
+            f = funct(**kwargs)
+            bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
+            schema = kwargs['schema']
+            bson_data = json.loads(bson_data)
+            return schema.dump(bson_data)
+        return inner
+    return decorator
 
 
-@jsonify
-def get_db_data(collection, _id=False, filter_by=False, return_one=False,
-        **kwargs):
+def get_db_data(
+        *, 
+        schema = None, 
+        collection: str = None, 
+        _id: str = '', 
+        filter_by: dict = {},
+        return_one: bool = False,
+        sort = None,
+        limit = None, 
+        ):
+    """Returns one or more Objects from the collection"""
+
     collection = db[collection]
 
     if _id:
-        response = collection.find_one({'_id': ObjectId(_id)}, **kwargs)
+        response = collection.find_one({'_id': ObjectId(_id)})
 
     elif filter_by and return_one:
-        response = collection.find_one(filter_by, **kwargs)
+        response = collection.find_one(filter_by)
 
     elif filter_by:
-        response = collection.find(filter_by, **kwargs)
+        response = collection.find(filter_by)
 
     else: 
-        response = collection.find({}, **kwargs)
+        response = collection.find({})
+
+    
+    if sort:
+            response = response.sort(sort)
+
+    if limit:
+            response = response.limit(limit)
 
     return response
 
-@jsonify
-def update_db_data(collection, data, _id=False, filter_by=None, **kwargs):
+def update_db_data(
+        *, 
+        schema = None, 
+        collection: str = None, 
+        _id: str = '', 
+        filter_by: dict = {},
+        return_one: bool = False,
+        sort = None,
+        limit = None, 
+        ):
+
     collection = db[collection]
     if _id:
         filter = {'_id': ObjectId(_id)}
@@ -59,7 +80,16 @@ def update_db_data(collection, data, _id=False, filter_by=None, **kwargs):
             **kwargs)
         
 
-@jsonify
-def load_db_data(collection, json_obj):
+def load_db_data(
+        *, 
+        schema = None, 
+        collection: str = None, 
+        _id: str = '', 
+        filter_by: dict = {},
+        return_one: bool = False,
+        sort = None,
+        limit = None, 
+        ):
+
     collection = db[collection]
     return collection.insert_one(json_obj).inserted_id
