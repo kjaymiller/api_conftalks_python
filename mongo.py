@@ -8,23 +8,20 @@ client = MongoClient(os.environ['MONGODB_URI'])
 db = client.get_database()
 
 
-def jsonify(schema):
-    def decorator(funct):
-        def inner(**kwargs):
-            f = funct(**kwargs)
-            bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
-            bson_data = json.loads(bson_data)
-            return schema.dump(bson_data)
-        return inner
+def jsonify(funct):
+    def inner(**kwargs):
+        f = funct(**kwargs)
+        bson_data = dumps(f, json_options=RELAXED_JSON_OPTIONS)
+        bson_data = json.loads(bson_data)
+        return bson_data
     return decorator
 
 
 def get_db_data(
         *, 
-        schema = None, 
         collection: str = None, 
-        _id: str = '', 
-        filter_by: dict = {},
+        _id: str = None, 
+        filter_by: dict = None,
         return_one: bool = False,
         sort = None,
         limit = None, 

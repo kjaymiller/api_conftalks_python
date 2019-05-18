@@ -5,19 +5,20 @@ from mongo import (
         update_db_data,
         jsonify,
         )
-from schemas import ConferenceSchema as schema
+from schemas import ConferenceSchema as Conference
 
 collection = 'conferences'
 
-@jsonify(schema())
-def get_one_conference(_id):
-    return get_db_data(
+def get_one_conference(*, _id:str):
+    """returns a single conference as a ConferenceSchema item"""
+    conference = get_db_data(
         collection=collection,
         _id=_id,
         )
+    return Conference.dump(conference)
 
-@jsonify(schema())
 def get_many_conferences(filter_by: dict={}):
+    """returns many conference items"""
     return get_db_data(
         collection=collection,
         filter_by=filter_by,
@@ -99,14 +100,6 @@ class ConferenceById:
 
     def on_get(self, req, resp, *, conference_id):
         """Returns a single conference item""" 
-
-## Removed Subscribed Users Temporarily
- #       if conference_data.get('subscribed_users'):
- #           conference_data['subscribed'] = req.headers['user_data']['email'] in conference_data['subscribed_users']
-        
- #       else: 
- #           conference_data['subscribed'] = False
-
         resp.media = get_one_conference(_id=conference_id)
 
 @api.route('/subscribe/conference/{conference_id}')
