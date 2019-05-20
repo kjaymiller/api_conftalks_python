@@ -5,29 +5,36 @@ from mongo import (
         update_db_data,
         jsonify,
         )
+
 from schemas import ConferenceSchema as Conference
 
 collection = 'conferences'
 
-def get_one_conference(*, _id:str):
+def get_conference_data(*, _id:str='', filter_by:dict={}):
     """returns a single conference as a ConferenceSchema item"""
-    conference = get_db_data(
-        collection=collection,
-        _id=_id,
-        )
-    return Conference.dump(conference)
+    
+    if _id:
+        conference_data = get_db_data(
+            collection=collection,
+            _id=_id,
+            )
+        many=False
 
-def get_many_conferences(filter_by: dict={}):
-    """returns many conference items"""
-    return get_db_data(
+    else:
+        conference_data = get_db_data(
         collection=collection,
         filter_by=filter_by,
         )
+        many=True
+    
+    return Conference(many=many).dump(conference_data)
             
 @api.route("/conferences")
 def conferences(req, resp):
     """
-    TODO: Add Filters
+    TODO: Add Filter Support for Date Recognition
+    TODO: Add Filter Support for Organizers
+    TODO: Add Filter Support for Subscribed Events Only
     ---
     get:
         description: Returns a list of the Conferences in the system
@@ -39,7 +46,8 @@ def conferences(req, resp):
                         schema:
                             $ref: '#/components/schemas/Conference'
     """
-    resp.media = get_many_conferences() # TODO: Add Filter_By from Request Header
+    conference_data = get_conference_data(filter_by=req.media.get('filter', {}))
+    resp.media = conference_data # TODO: Add Filter_By from Request Header
 
 
 @api.route('/conferences/{conference_id}')
@@ -100,7 +108,7 @@ class ConferenceById:
 
     def on_get(self, req, resp, *, conference_id):
         """Returns a single conference item""" 
-        resp.media = get_one_conference(_id=conference_id)
+        resp.media = get_conference_data(_id=conference_id)
 
 @api.route('/subscribe/conference/{conference_id}')
 class SubscribeToConference:

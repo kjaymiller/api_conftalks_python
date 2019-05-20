@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 
 @api.schema('Event')
 class EventSchema(Schema):
-    id = fields.Str(attribute="_id.$oid")
+    id = fields.Str(attribute=str('_id'))
     conference = fields.Str()
     url = fields.Str()
     name = fields.Str()
@@ -17,7 +17,7 @@ class EventSchema(Schema):
 
 @api.schema('Conference')
 class ConferenceSchema(Schema):
-    id = fields.Str(attribute=str(id))
+    id = fields.Str(attribute=str('_id'))
     url = fields.Str()
     name = fields.Str()
     subscribed = fields.Boolean()
