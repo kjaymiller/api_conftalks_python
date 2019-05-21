@@ -18,13 +18,13 @@ def jsonify(funct):
 
 
 def get_db_data(
-        *, 
-        collection: str = None, 
-        _id: str = None, 
+        *,
+        collection: str = None,
+        _id: str = None,
         filter_by: dict = None,
         return_one: bool = False,
         sort = None,
-        limit = None, 
+        limit = None,
         ):
     """Returns one or more Objects from the collection"""
 
@@ -39,10 +39,10 @@ def get_db_data(
     elif filter_by:
         response = collection.find(filter_by)
 
-    else: 
+    else:
         response = collection.find({})
 
-    
+
     if sort:
             response = response.sort(sort)
 
@@ -52,14 +52,14 @@ def get_db_data(
     return response
 
 def update_db_data(
-        *, 
-        schema = None, 
-        collection: str = None, 
-        _id: str = '', 
+        *,
+        schema = None,
+        collection: str = None,
+        _id: str = '',
         filter_by: dict = {},
         return_one: bool = False,
         sort = None,
-        limit = None, 
+        limit = None,
         ):
 
     collection = db[collection]
@@ -70,21 +70,21 @@ def update_db_data(
         filter = filter_by
 
     return collection.find_one_and_update(
-            filter, 
-            data, 
+            filter,
+            data,
             return_document=ReturnDocument.AFTER,
             **kwargs)
-        
+
 
 def load_db_data(
-        *, 
-        schema = None, 
-        collection: str = None, 
-        _id: str = '', 
+        *,
+        schema = None,
+        collection: str = None,
+        _id: str = '',
         filter_by: dict = {},
         return_one: bool = False,
         sort = None,
-        limit = None, 
+        limit = None,
         ):
 
     collection = db[collection]

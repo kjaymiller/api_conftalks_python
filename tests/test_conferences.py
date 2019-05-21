@@ -62,7 +62,7 @@ def test_get_one_conference(api, mocker, fake_conference):
 @pytest.fixture
 def mocked_db_get_many():
     """Generates a random amount of fake data"""
-    mocks = [gen_fake_conference() for x in range(randint(2,10))] # Creates between 2-10 Items
+    mocks = [gen_fake_conference() for x in range(randint(5,15))] # Creates between 2-10 Items
     return mocks
 
 
@@ -75,6 +75,18 @@ def test_get_all_conferences(api, mocker, mocked_db_get_many):
     r = api.requests.get('/conferences')
     assert r.json()
     assert len(r.json()) == len(mocked_db_get_many)
+
+def test_get_some_conferences(api, mocker, mocked_db_get_many):
+    mocker.patch(
+            'conferences.find',
+            lambda **kwargs: mocked_db_get_many,
+            )
+    limit = randint(4, len(mocked_db_get_many)-1)
+
+    params = {'limit': limit}
+    r = api.requests.get('/conferences', params=params)
+    assert r.json()
+    assert len(r.json()) == limit
 
 # def test_mocked_db_post():
     # TODO: mock adding fake data to the database

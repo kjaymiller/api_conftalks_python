@@ -10,7 +10,13 @@ from schemas import ConferenceSchema as Conference
 
 collection = 'conferences'
 
-def get_conference_data(*, _id:str='', filter_by:dict={}):
+def get_conference_data(
+        *,
+        _id:str='',
+        filter_by:dict={},
+        limit:dict={},
+        sort: dict={}
+        ):
     """returns a single conference as a ConferenceSchema item"""
 
     if _id:
@@ -24,9 +30,12 @@ def get_conference_data(*, _id:str='', filter_by:dict={}):
         conference_data = get_db_data(
         collection=collection,
         filter_by=filter_by,
+        limit=limit,
+        sort=sort,
         )
         many=True
 
+    print(conference_data)
     return Conference(many=many).dump(conference_data)
 
 @api.route("/conferences")
@@ -46,8 +55,10 @@ def conferences(req, resp):
                         schema:
                             $ref: '#/components/schemas/Conference'
     """
-    conference_data = get_conference_data(filter_by=req.media('filter', {}))
-    resp.media = conference_data # TODO: Add Filter_By from Request Header
+    limit = req.params.get('limit', {})
+    filter_by = req.headers.get('filter', {})
+    conference_data = get_conference_data(filter_by=filter_by, limit=limit)
+    resp.media = conference_data
 
 
 @api.route('/conferences/{conference_id}')
