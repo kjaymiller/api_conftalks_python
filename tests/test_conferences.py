@@ -1,5 +1,5 @@
 import pytest
-import api as service 
+import api as service
 from faker import Faker
 import conferences
 import mongo
@@ -19,8 +19,8 @@ def api():
 
 
 def gen_fake_conference():
-    name = fake.company() + 'Con' 
-    _id =  ObjectId()
+    name = fake.company() + 'Con'
+    _id =  str(ObjectId())
     fake_start_datetime = maya.when(
             str(fake.future_date(end_date="+1y")),
             timezone=fake.timezone())
@@ -41,7 +41,7 @@ def fake_conference():
     return gen_fake_conference()
 
 def test_conference_data_variables():
-    pass    
+    pass
 
 def test_get_one_conference(api, mocker, fake_conference):
     """Generate Fake Data and simulate returning it"""
@@ -50,10 +50,11 @@ def test_get_one_conference(api, mocker, fake_conference):
 
     mocker.patch(
         'conferences.get_db_data',
-        lambda **kwargs: fake_conference, 
+        lambda **kwargs: fake_conference,
         )
 
     r = api.requests.get(f'/conferences/{_id}')
+    print(r.json())
     assert r.json() # Will fail if no json data is passed
     assert r.json()['id'] == _id # pulls just the ID as a string and NOT AS A DICT
     assert r.json()['name'] == name
@@ -75,7 +76,7 @@ def test_get_all_conferences(api, mocker, mocked_db_get_many):
     assert r.json()
     assert len(r.json()) == len(mocked_db_get_many)
 
-# def test_mocked_db_post(): 
+# def test_mocked_db_post():
     # TODO: mock adding fake data to the database
     # TODO: mock retrieving that data
 

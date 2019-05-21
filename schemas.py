@@ -17,10 +17,12 @@ class EventSchema(Schema):
 
 @api.schema('Conference')
 class ConferenceSchema(Schema):
-    id = fields.Str(attribute=str('_id'))
+    id = fields.Function(lambda obj: str(obj['id']))
     url = fields.Str()
     name = fields.Str()
     subscribed = fields.Boolean()
+    event_start = fields.Str()
+    event_end = fields.Str()
 
 
 @api.schema('User')

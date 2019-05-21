@@ -12,7 +12,7 @@ collection = 'conferences'
 
 def get_conference_data(*, _id:str='', filter_by:dict={}):
     """returns a single conference as a ConferenceSchema item"""
-    
+
     if _id:
         conference_data = get_db_data(
             collection=collection,
@@ -26,9 +26,9 @@ def get_conference_data(*, _id:str='', filter_by:dict={}):
         filter_by=filter_by,
         )
         many=True
-    
+
     return Conference(many=many).dump(conference_data)
-            
+
 @api.route("/conferences")
 def conferences(req, resp):
     """
@@ -46,7 +46,7 @@ def conferences(req, resp):
                         schema:
                             $ref: '#/components/schemas/Conference'
     """
-    conference_data = get_conference_data(filter_by=req.media.get('filter', {}))
+    conference_data = get_conference_data(filter_by=req.media('filter', {}))
     resp.media = conference_data # TODO: Add Filter_By from Request Header
 
 
@@ -54,16 +54,16 @@ def conferences(req, resp):
 class ConferenceById:
     """
     ---
-    get: 
+    get:
         description: Return the information on a single conference.
         parameters:
             - in: path
               name: conference_id
-              description: The id of the conference that you are wanting to load.
+              description: The id of the conference that you are wanting to load
               schema:
                 type: string
               required: true
-            
+
         responses:
             200:
                 description: Success
@@ -107,7 +107,7 @@ class ConferenceById:
         resp.media = get_db_data(collection='conferences', _id=insert_id)
 
     def on_get(self, req, resp, *, conference_id):
-        """Returns a single conference item""" 
+        """Returns a single conference item"""
         resp.media = get_conference_data(_id=conference_id)
 
 @api.route('/subscribe/conference/{conference_id}')
@@ -116,7 +116,7 @@ class SubscribeToConference:
     Subscribe Data
     ---
     put:
-        description: Adds your email to the conference subscription list. This means that you       will recieve all notifications for this event. If you only want some of the notifications, look at /subscribe/event/{event_id}
+        description: Adds your email to the conference subscription list. This means that you will recieve all notifications for this event. If you only want some of the notifications, look at /subscribe/event/{event_id}
         responses:
             200:
                 description: Success (email was added)
@@ -130,4 +130,3 @@ class SubscribeToConference:
         response = update_db_data('conferences', data=data, _id=conference_id)
         response['subscribed'] = True
         resp.media = ConferenceSchema().dump(response)
-
