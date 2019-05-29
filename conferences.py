@@ -5,9 +5,25 @@ from mongo import (
         update_db_data,
         )
 from schemas import ConferenceSchema
+import re
 
 
 collection = 'conferences'
+
+
+def get_filter(filter_text):
+        comp = re.compile(r'(?P<key>[\w+ *]+) (?P<filter>(eq)|(ne)) (?P<values>\w+,* *)+')
+        re_filter = comp.match(filter_text)
+
+        key = re_filter.group('key')
+        filter_value = '$' + re_filter.group('filter')
+        values = re_filter.group('values')
+
+        if key in ('event_start', 'event_end'):
+            values = maya.when(re_filter.group('values').datetime()
+
+        return {key: {filter_value: values}}
+
 
 def get_conference_data(**kwargs):
     """returns a single conference as a ConferenceSchema item"""
@@ -20,6 +36,7 @@ def get_conference_data(**kwargs):
         many=True
 
     return ConferenceSchema(many=many).dump(conference_data)
+
 
 @api.route("/conferences")
 def conferences(req, resp):
@@ -38,7 +55,12 @@ def conferences(req, resp):
                         schema:
                             $ref: '#/components/schemas/Conference'
     """
-    conference_data = get_conference_data(**req.params)
+    filter_by = None
+
+    if 'filter' in req.params:
+        filter_by = get_filter(req.params['filter'])
+
+    conference_data = get_conference_data(filter_by=filter_by, **req.params)
     resp.media = conference_data
 
 

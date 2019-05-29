@@ -26,7 +26,7 @@ def gen_fake_conference():
             str(fake.future_date(end_date="+1y")),
             timezone=fake.timezone())
     fake_end_datetime = fake_start_datetime.add(days=randint(1,365))
-    fake_tags = fake.words(nb=randint(0,5), unique=True)
+    fake_tags = fake.words(nb=randint(1,5), unique=True)
 
     event_data = {
             'id': _id,
@@ -64,7 +64,7 @@ def test_get_one_conference(api, mocker, fake_conference):
 @pytest.fixture
 def mocked_db_get_many():
     """Generates a random amount of fake data"""
-    mocks = [gen_fake_conference() for x in range(randint(5,15))] # Creates between 2-10 Items
+    mocks = [gen_fake_conference() for x in range(randint(5,15))] # Creates between 5-15 Items
     return mocks
 
 
@@ -100,14 +100,33 @@ def test_get_some_conferences_sees_sort(api, mocker, mocked_db_get_many):
         assert kwargs['order_by'][0] == sort[1]
 
 
-def test_get_some_conferences_sees_filter_by_tags(api, mocker, mocked_db_get_many):
+def test_get_filters_for_tags(mocked_db_get_many):
+    tags = choice(mocked_db_get_many)['tags']
+    search_tag = choice(tags)
+    payload1 = {'filter': f'tags eq {search_tag}'}
+    payload2 = {'filter': f'tags ne {search_tag}'}
+    assert conferences.get_filter(payload1['filter']) == {'tags': {'$eq': search_tag}}
+    assert conferences.get_filter(payload2['filter']) == {'tags': {'$ne': search_tag}}
+
+
+@pytest.mark.parameterize('filter_type', ['eq', 'ne', 'lt', 'gt', 'ge', 'le'])
+def test_get_filters_for_dates(mocked_db_get_many):
+    date_choice = choice('event_start', 'event_end')
+    dates = choice(mocked_db_get_many)[date_choice]
+    payload = {'filter': f'{date_choice} {filter_type} dates'}
+    assert conferences.get_filter(payload)
+
+
+def test_get_some_conferences_with_filtered_tags(api, mocker, mocked_db_get_many):
     m = mocker.patch('conferences.get_db_data')
     tags = choice(mocked_db_get_many)['tags']
     search_tag = choice(tags)
     payload = {'filter': f'tags eq {search_tag}'}
     r = api.requests.get('/conferences', params=payload)
     _, kwargs = m.call_args
-    assert kwargs['filter'] == {'tags': {'$eq': search_tag}}
+    print(kwargs)
+    assert kwargs['filter_by'] == {'tags': {'$eq': search_tag}}
+
 
 # def test_mocked_db_post():
     # TODO: mock adding fake data to the database
@@ -115,4 +134,3 @@ def test_get_some_conferences_sees_filter_by_tags(api, mocker, mocked_db_get_man
 
 # def mocked_db_update():
     # TODO: mock fetching data and updating it with the find_one_and_update
-    # call

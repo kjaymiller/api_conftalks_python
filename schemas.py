@@ -15,6 +15,14 @@ class EventSchema(Schema):
     subscribed = fields.Boolean()
 
 
+@api.schema('User')
+class UserSchema(Schema):
+    id = fields.Str(attribute="_id.$oid")
+    name = fields.Str()
+    subscribed_conferences = fields.List(fields.String)
+    subscribed_events = fields.List(fields.String)
+
+
 @api.schema('Conference')
 class ConferenceSchema(Schema):
     id = fields.Function(lambda obj: str(obj['id']))
@@ -24,11 +32,4 @@ class ConferenceSchema(Schema):
     event_start = fields.Str()
     event_end = fields.Str()
     tags = fields.List(fields.Str())
-
-
-@api.schema('User')
-class UserSchema(Schema):
-    id = fields.Str(attribute="_id.$oid")
-    name = fields.Str()
-    subscribed_conferences = fields.List(fields.String)
-    subscribed_events = fields.List(fields.String)
+    organizers = fields.Nested(UserSchema, many=True, only=('id',))
