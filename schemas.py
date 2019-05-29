@@ -23,6 +23,7 @@ class ConferenceSchema(Schema):
     subscribed = fields.Boolean()
     event_start = fields.Str()
     event_end = fields.Str()
+    tags = fields.List(fields.Str())
 
 
 @api.schema('User')

@@ -3,40 +3,23 @@ from mongo import (
         get_db_data,
         load_db_data,
         update_db_data,
-        jsonify,
         )
+from schemas import ConferenceSchema
 
-from schemas import ConferenceSchema as Conference
 
 collection = 'conferences'
 
-def get_conference_data(
-        *,
-        _id:str='',
-        filter_by:dict={},
-        limit:dict={},
-        sort: dict={}
-        ):
+def get_conference_data(**kwargs):
     """returns a single conference as a ConferenceSchema item"""
-
-    if _id:
-        conference_data = get_db_data(
-            collection=collection,
-            _id=_id,
-            )
+    if '_id' in kwargs:
+        conference_data = get_db_data(collection=collection, _id=kwargs['_id'])
         many=False
 
     else:
-        conference_data = get_db_data(
-        collection=collection,
-        filter_by=filter_by,
-        limit=limit,
-        sort=sort,
-        )
+        conference_data = get_db_data(collection=collection, _id=None, **kwargs)
         many=True
 
-    print(conference_data)
-    return Conference(many=many).dump(conference_data)
+    return ConferenceSchema(many=many).dump(conference_data)
 
 @api.route("/conferences")
 def conferences(req, resp):
@@ -55,16 +38,13 @@ def conferences(req, resp):
                         schema:
                             $ref: '#/components/schemas/Conference'
     """
-    limit = req.params.get('limit', {})
-    filter_by = req.headers.get('filter', {})
-    conference_data = get_conference_data(filter_by=filter_by, limit=limit)
+    conference_data = get_conference_data(**req.params)
     resp.media = conference_data
 
 
 @api.route('/conferences/{conference_id}')
 class ConferenceById:
     """
-    ---
     get:
         description: Return the information on a single conference.
         parameters:
