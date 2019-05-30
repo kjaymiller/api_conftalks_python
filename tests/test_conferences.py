@@ -109,12 +109,12 @@ def test_get_filters_for_tags(mocked_db_get_many):
     assert conferences.get_filter(payload2['filter']) == {'tags': {'$ne': search_tag}}
 
 
-@pytest.mark.parameterize('filter_type', ['eq', 'ne', 'lt', 'gt', 'ge', 'le'])
-def test_get_filters_for_dates(mocked_db_get_many):
-    date_choice = choice('event_start', 'event_end')
+@pytest.mark.parametrize('filter_type', ['eq', 'ne', 'lt', 'gt', 'ge', 'le'])
+def test_get_filters_for_dates(mocked_db_get_many, filter_type):
+    date_choice = choice(('event_start', 'event_end'))
     dates = choice(mocked_db_get_many)[date_choice]
-    payload = {'filter': f'{date_choice} {filter_type} dates'}
-    assert conferences.get_filter(payload)
+    payload = {'filter': f'{date_choice} {filter_type} {dates}'}
+    assert conferences.get_filter(payload['filter'])
 
 
 def test_get_some_conferences_with_filtered_tags(api, mocker, mocked_db_get_many):

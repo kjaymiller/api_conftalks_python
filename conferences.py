@@ -6,13 +6,14 @@ from mongo import (
         )
 from schemas import ConferenceSchema
 import re
+import maya
 
 
 collection = 'conferences'
 
 
 def get_filter(filter_text):
-        comp = re.compile(r'(?P<key>[\w+ *]+) (?P<filter>(eq)|(ne)) (?P<values>\w+,* *)+')
+        comp = re.compile(r'(?P<key>[\w+ *]+) (?P<filter>([egln][qte]) (?P<values>\w+,* *)+')
         re_filter = comp.match(filter_text)
 
         key = re_filter.group('key')
@@ -20,9 +21,13 @@ def get_filter(filter_text):
         values = re_filter.group('values')
 
         if key in ('event_start', 'event_end'):
-            values = maya.when(re_filter.group('values').datetime()
+            values = maya.when(re_filter.group('values')).datetime()
 
-        return {key: {filter_value: values}}
+        return {
+            key:{
+                filter_value: values
+                }
+            }
 
 
 def get_conference_data(**kwargs):

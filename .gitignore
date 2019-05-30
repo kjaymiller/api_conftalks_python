@@ -1,2 +1,4 @@
 config.py
 .env
+.idea/workspace.xml
+__pycache__/
